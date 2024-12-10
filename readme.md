@@ -65,14 +65,14 @@ volumes:
 
 Isso vai criar dois containers, um para o wordpress e outro para o mysql.
 O nosso objetivo agora é criar uma instancia EC2 que se conecte a esse container mysql.
-Now you can go into your browser na porta 8080.
+agora você pode acessar na porta 8080.
 localhost:8080
 
 ![alt text](images/wordpressHello.png)
 
-# EC2 instancia
+## Passo 3: Criando uma instancia EC2
 
 1. Primeiramente é necessário uma conta AWS.
-   Busque por AMI, irá trazer o catalogo
+2.
 
 -
