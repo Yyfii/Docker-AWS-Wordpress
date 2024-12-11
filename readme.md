@@ -138,3 +138,22 @@ Nossa instancia vai ter um ip público, com um grupo de segurança(que vai contr
 1. SSH traffic from and HTTP traffic from the internet -> Anywhere (0.0.0.0/0)
 
 ##### 1.4 Advanced Details
+
+##### User data
+
+Você pode criar um arquivo.sh e fazer o upload tbm, mas por motivos de aprendizado colocaremos manualmente.
+
+```
+#!/bin/bash
+#Install httpd
+yum update
+yum install -y
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+echo "<h1> Hello World from $(hostname -f) </h1>" > /var/www/html/index.htlml
+```
+
+Cole o código acima no user data.
+
+[![Watch the video](https://img.youtube.com/vi/T-D1KVIuvjA/maxresdefault.jpg)](images/launchInstance.mp4)
