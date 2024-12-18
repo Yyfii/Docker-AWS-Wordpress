@@ -270,3 +270,103 @@ E cole no seu navegador.
 ![alt text](images/teste-ec2-wordpress.jpeg)
 
 ## Passo 6: Conectando a instancia EC2 a um banco de dados Mysql.
+
+1. Criar grupos de segurança/security groups.
+2. Criar RDS.
+3. Criar ec2-1
+4. Conectar ec2-1 ao RDS.
+5. Criar ec2-2.
+6. Testar conexão da ec2-2 com o RDS.
+
+### 1 Criar grupo de segurança/security group.
+
+#### 1.2 Security group do banco RDS.
+
+- Especificações:
+  Nome: rds-database-1
+  Inbound rules: SSH(22);MYSQL/AURORA(3306)
+
+Esse security group permitirá o acesso ssh/remoto e fará com que a comunicação com o banco seja na porta 3306 para todos. (Anywhere 0.0.0.0/0)
+
+#### 1.3 Security group das EC2s.
+
+- Especificações:
+  Nome: ec2-sg
+  Inbound rules:HTTP(80); SSH(22);Custom TCP (8080) Anywhere IPv4.
+
+Esse security group permitirá o acesso ssh, e ficará com as portas 80 e 8080 para comunicação web.
+
+### 2 Criar RDS.
+
+- Especificações:
+  Engine: Mysql; Templates: Free Tier; Settings.DB instance identifier: rds-database-1; Credentials settings: admin - MyNewPass1; Connectivity: Don´t connect to an EC2 compute resource. VPC security group. choose existing: rds-database-1. Additional configuration: backup (disable).
+
+### 3 Criar ec2-1
+
+- Especificações:
+  Name: ec2-1; key pair; Security group : ec2-sg.
+
+### 4 Conectar ec2-1 ao RDS.
+
+- Instancia(ec2-1) > Networking > RDS database (selecione o banco criado - rds-database-1)
+
+Copie o ip público da instância.
+
+```
+> ssh -i "suakeypair.pem" ec2-user@<ip instancia>
+> sudo dnf install mariadb105 -y
+> sudo mysql --version
+```
+
+Vá no seu RDS e copie o endpoint nos detalhes.
+
+```
+> sudo mysql -h <endpoint> -P 3306 -u admin -p
+Password: MyNewPass1
+mysql [none]> DROP DATABASE IF EXISTS wordpress;
+mysql [none]> CREATE DATABASE wordpress;
+mysql [none]> use wordpress;
+mysql [wordpress]> CREATE TABLE users(
+id integer primary key auto_increment,
+name varchar(255) not null,
+surname varchar(255) not null
+);
+mysql [wordpress]> INSERT INTO users(name, surname) values("Maria", "Josefina");
+```
+
+Agora, vá na sua vpc, detalhes e na seção de CIDRs, verifique o CIDR da vpc, por exemplo: 172.31.0.0.
+
+```
+mysql [wordpress]> CREATE USER 'maria'@'172.31.%.%' IDENTIFIED WITH mysql_native_password BY 'MyNewPass1';
+```
+
+O usuário maria só poderá ter acesso ao banco se estiver dentro da vpc.
+
+```
+mysql [wordpress]> GRANT ALL PRIVILEGES ON wordpress.* TO 'maria'@'172.31.%.%';
+mysql [wordpress]> SELECT * FROM users;
+```
+
+Se tudo estiver certo até aqui, agoar podemos testar a conexão deste banco em outra máquina dentro da vpc.
+
+### 5 Criar ec2-2.
+
+- Crie outra ec2, no mesmo security group da anterior, apenas com o nome diferente, defina o nome para ec2-2.
+
+Na instancia, após ser criada, conecte-a ao rds-database-1.
+
+### 6 Testar conexão da ec2-2 com o RDS.
+
+```
+> ssh -i "suakeypair.pem" ec2-user@<ip instancia>
+> sudo dnf install mariadb105 -y
+> sudo mysql --version
+> sudo mysql -h <endpoint> -P 3306 -u admin -p
+Password: MyNewPass1
+mysql [none]> use wordpress;
+mysql [wordpress]> SELECT * FROM users;
+```
+
+Se isso funcionou, então as suas instancias conseguem chegar até o rds. Então conseguimos com sucesso conectar as EC2s ao RDS.
+
+O nosso próximo passo é conectar uma instancia EC2 Wordpress com o banco RDS.
