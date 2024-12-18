@@ -26,3 +26,5 @@ INSERT INTO characters(nome, details) values("Aragon", "King of fools land in gr
 CREATE USER 'frodo'@'172.31.%.%' IDENTIFIED WITH mysql_native_password BY 'MyNewPass1';
 GRANT ALL PRIVILEGES ON lotr* TO 'frodo'@'172.31.%.%';
 SELECT * FROM characters;
+
+---
