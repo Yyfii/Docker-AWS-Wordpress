@@ -1,3 +1,15 @@
+#!/bin/bash
+yum update -y
+yum install git docker -y
+systemctl enable docker
+systemctl start docker
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+cd /
+mkdir files
+
+cat <<EOF> /files/compose.yml
 services:
   wordpress:
     image: wordpress
@@ -5,23 +17,16 @@ services:
     ports:
       - 8080:80
     environment:
-      WORDPRESS_DB_HOST: rds
-      WORDPRESS_DB_USER: mainUser
-      WORDPRESS_DB_PASSWORD: mainPassword
-      WORDPRESS_DB_NAME: website
+      WORDPRESS_DB_HOST: my-db-rds.cz2gg0mwcojr.us-east-1.rds.amazonaws.com:3306
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: MyNewPass1
+      WORDPRESS_DB_NAME: wordpress
     volumes:
       - wordpress:/var/www/html
-  rds:
-    image: mysql:5.7
-    restart: always
-    environment:
-      MYSQL_DATABASE: website
-      MYSQL_USER: mainUser
-      MYSQL_PASSWORD: mainPassword
-      MYSQL_RANDOM_ROOT_PASSWORD: "1"
-    volumes:
-      - rds:/var/lib/mysql
-
 volumes:
   wordpress:
-  rds:
+EOF
+
+sudo docker-compose -f /files/compose.yml up -d
+
+sud docker ps

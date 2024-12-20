@@ -2,15 +2,19 @@
 
 Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon RDS, Load Balancer.
 
-##### Passo 1: Testando o worpress localmente
+##### Passo 1: Testando o worpress localmente.
 
-##### Passo 2: Testando o wordpress com o banco
+##### Passo 2: Testando o wordpress com o banco.
 
-##### Passo 3: Criando uma instancia EC2
+##### Passo 3: Criando uma instancia EC2.
 
-##### Passo 4: Deletando uma instância EC2
+##### Passo 4: Deletando uma instância EC2.
 
-##### Passo 5: Criando EC2 e User Data script
+##### Passo 5: Criando EC2 e User Data script.
+
+##### Passo 6: Conectando a instancia EC2 a um banco de dados Mysql.
+
+##### Passo 7: Conectando uma instancia Wordpress ao RDS.
 
 ## Construindo um Container Wordpress
 
@@ -370,3 +374,146 @@ mysql [wordpress]> SELECT * FROM users;
 Se isso funcionou, então as suas instancias conseguem chegar até o rds. Então conseguimos com sucesso conectar as EC2s ao RDS.
 
 O nosso próximo passo é conectar uma instancia EC2 Wordpress com o banco RDS.
+
+## Passo 7: Conectando uma instancia Wordpress ao RDS.
+
+1. Criar VPC.
+2. Criar grupos de segurança.
+3. Criar RDS.
+4. Criar Instancia.
+5. Conectar instancia ao RDS.
+
+Esse é o nosso objetivo.
+![alt text](images/CONNECT-EC2-TO-RDS.jpeg)
+
+### 1 Criar VPC.
+
+Vá para:
+
+##### VPC > Criar VPC
+
+- Especificações:
+  VPC e mais, VPC-WORDPRESS, 10.0.0.0/16, AZ = 2, Subnets públicas = 2 , Subnets privadas = 2, Nat Gateway.
+
+-> Criar
+
+### 2 Criar grupos de segurança.
+
+- Especificações:
+  Iremos criar dois grupos de segurança, um para a instancia que se conectará com o banco e outro para o RDS, para abrir sua porta para comunicação.
+
+##### VPC > Grupos de Segurança > Criar Grupo de sugurança
+
+- Especificações:
+  Nome: wordpress-public-sg, VPC(VPC-WORDPRESS-vpc), Inbound rules (SSH, HTTP, HTTPS, Custom TCP (8080)) para Anywhere (0.0.0.0/0).
+
+![alt text](images/sg-ec2.jpeg)
+
+-> Criar
+
+##### Grupos de Segurança > Criar Grupo de sugurança
+
+- Especificações:
+  Nome: wordpress-rds-sg, VPC(VPC-WORDPRESS-vpc), Inbound rules (MYSQL/AURORA) para Anywhere (0.0.0.0/0).
+
+![alt text](images/RDS-SG.jpeg)
+
+-> Criar
+
+Agora temos os nossos grupos de segurança criados.
+
+### 3 Criar RDS.
+
+##### RDS > Criar banco de dados
+
+- Especificações:
+- - Standard create
+- - Mysql
+- - Free Tier
+- - DB identificador instancia: wordpress-rds
+- - admin - MyNewPass1
+- - db.t3.micro
+- - Não conect com uma ec2.
+- - VPC-WORDPRESS-vpc
+- - Grupo de segurança: wordpress-rds-sg
+- - Configuração adicional: banco de dados incial - `wordpress`.
+
+-> Criar
+
+Espere o banco ser criado, e copie o seu endpoint. Pois ele será colocado do WORDPRESS_HOST no user data.
+
+![alt text](images/endpoint-database.jpeg)
+
+### 3 Criar Instancia.
+
+- Especificações:
+- - ec2-wordpress
+- - vpc - VPC-WORDPRESS-vpc
+- - Auto-associar ip publico - habilitar
+- - Selecionar grupo de segurança existente: wordpress-public-sg
+- - `Detalhes avançados > User data:`
+
+```
+#!/bin/bash
+
+# Atualiza os pacotes da maquina
+yum update -y
+
+# Instala o git e o docker
+yum install git docker -y
+
+# Inicia o docker e instala o docker compose
+systemctl enable docker
+systemctl start docker
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Cria uma pasta no diretório raiz, para que o compose.yml não fique nos arquivos temporarios
+cd /
+mkdir files
+
+# Cria um arquivo compose.yml na pasta files
+cat <<EOF> /files/compose.yml
+services:
+  wordpress:
+    image: wordpress
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: <ENDPOINT COPIADO>:3306
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: MyNewPass1
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress:/var/www/html
+volumes:
+  wordpress:
+EOF
+
+# Executa o compose.yml, criando assim o container wordpress
+sudo docker-compose -f /files/compose.yml up -d
+```
+
+-> Criar
+
+Agora nas instancias, selecione sua instancia:
+
+##### Instancia > Ações > Networking > Connect RDS Database.
+
+![alt text](images/ec2-connect.jpeg)
+
+E clique em conectar/connect.
+
+Agora na sua instancia, cheque se o status está como `2/2 checks passed´, se sim então ela já está pronto.
+Vá em detalhes e copie o ip público da instancia.
+
+No browser: `<ip>:8080`
+
+![alt text](images/status-instancia.jpeg)
+
+E note que agora ela não pede mais informações sobre o banco.
+
+![alt text](images/status-banco.jpeg)
+
+E com isso conseguimos conectar a nossa instancia EC2 com o RDS.
