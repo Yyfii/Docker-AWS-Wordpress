@@ -38,15 +38,15 @@ No seu AWS Console, busque por VPC, em seguida clique em criar VPC.
 |                   | 3 subnets públicas              |
 |                   | 2 subnets privadas              |
 
-![alt text](/images/VPC.jpeg)
+| ![alt text](/images/VPC.jpeg) |
+| :---------------------------: |
 
 ##### Passo 2: Criando os Security groups.
 
 Agora iremos criar os **Security Groups(SG)**, iremos criar dois SG, um público, que será usado pelo Load Balancer e o Bastion Host. E um privado, que será usado, pelas instancias EC2, RDS e todos os resources que exigem níveis de seguranaça.
 
-<p style="text-align: center;">
-  <img src="/images/SGs.jpeg" alt="alt text"  width="450" height="400">
-</p>
+| ![alt text](/images/SGs.jpeg) |
+| :---------------------------: |
 
 Vá para:
 
@@ -102,7 +102,8 @@ Após ter criado os security groups, vá no **WEB-WORDPRESS-PRIVATE-SG**, em edi
 
 Clique no **file system** criado, na seção de Network clique em manage e mude os security groups para o **WEB-WORDPRESS-PRIVATE1-SG**.
 
-![alt text](/images/efsconfig.png)
+| ![alt text](/images/efsconfig.png) |
+| :--------------------------------: |
 
 ##### Passo 5: Criando e configurando o Nat Gateway.
 
@@ -120,7 +121,8 @@ O **Nat Gateway** vai permitir a conexão das instancias privadas com a internet
 | **Ação**                  | Clicar em Alocar IP Elastico                |
 | **VPC**                   | WEB-WORDPRESS-VPC-vpc                       |
 
-![alt text](/images/nat-gateway.jpeg)
+| ![alt text](/images/nat-gateway.jpeg) |
+| :-----------------------------------: |
 
 - ###### Criar.
 
@@ -223,9 +225,8 @@ Ela pode demorar um pouco pra carregar por conta de ainda estar iniciando o cont
 
 Ela deve mostrar a página inicial do Wordpress.
 
-<p style="text-align: center;">
-  <img src="/images/BH.png" alt="alt text"  width="500" height="260">
-</p>
+| ![alt text](/images/BH.png) |
+| :-------------------------: |
 
 ##### Passo 8: Criando um launch template.
 
@@ -262,7 +263,8 @@ Selecione o template criado.
 
 Agora iremos verificar se a instancia está correta, acessando-a pelo **Bastion Host**.
 
-![alt text](/images/accessSSHBH.png)
+| ![alt text](/images/accessSSHBH.png) |
+| :----------------------------------: |
 
 Clique em conect, e ele irá abrir dentro do BastionHost.
 
@@ -272,9 +274,8 @@ Abra a sua keypair utilizada na instancia e cole no arquivo **pbnov24** aberto p
 Copie o Ip privado da instancia criada.
 ` sudo ssh -i "pbnov24" ec2-user@<ip privado da instancia>`
 
-<p style="text-align: center;">
-  <img src="/images/sshS1.png" alt="alt text"  width="500" height="200">
-</p>
+| ![alt text](/images/sshS1.png) |
+| :----------------------------: |
 
 Siga os comonados da imagem acima.
 
@@ -285,9 +286,8 @@ ls
 sudo ssh -i "pbnov24" ec2-user@<ip privado da instancia>
 ```
 
-<p style="text-align: center;">
-  <img src="/images/sshprivate.png" alt="alt text"  width="700" height="260">
-</p>
+| ![alt text](/images/sshprivate.png) |
+| :---------------------------------: |
 
 Siga os comonados da imagem acima.
 
@@ -313,7 +313,8 @@ Procure por Classic Load Balancer e clique em criar.
 
 - Agora crie outra instancia usando o template WEB-WORDPRESS-SERVERS para testarmos o Load Balancer.
 
-![alt text](/images/instances.png)
+| ![alt text](/images/instances.png) |
+| :--------------------------------: |
 
 - Neste mommento o que nos resta é associar as instancias criadas para verificar se o Load Balancer está de fato funcionando.
 
@@ -321,29 +322,27 @@ Procure por Classic Load Balancer e clique em criar.
 
 - Vá para a seção de target Instances, Manage Instances.
 
-![alt text](/images/manageInstances.png)
+| ![alt text](/images/manageInstances.png) |
+| :--------------------------------------: |
 
 - Agora na target Instances, verifique se o Healthy status das instancias está In-Service.
 
 Copie e acesse o DNS do load balancer no seu navegador.
 
-<p style="text-align: center;">
-  <img src="/images/lbtest.png" alt="alt text"  width="450" height="260">
-</p>
+| ![alt text](/images/lbtest.jpeg) |
+| :------------------------------: |
 
 Testando em outro dispositivo:
 
-<p style="text-align: center;">
-  <img src="/images/lbtest2.jpeg" alt="alt text"  width="200" height="400">
-</p>
+| ![alt text](/images/lbtest2.jpeg) |
+| :-------------------------------: |
 
 Já que o nosso Load Balancer está rodando, iremos dar inicio a criação do Auto Scaling.
 
 Até agora temos:
 
-<p style="text-align: center;">
-  <img src="/images/diagrama.png" alt="alt text"  width="450" height="600">
-</p>
+| ![alt text](/images/diagrama.png) |
+| :-------------------------------: |
 
 ##### Passo 11: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
 
@@ -361,15 +360,13 @@ Vá no link DNS aberto do Load balancer e faça o refresh ou recarregue com F5. 
 
 Agora, a estrutura do nosso projeto
 
-<p style="text-align: center;">
-  <img src="/images/diagrama3.png" alt="alt text"  width="450" height="600">
-</p>
+| ![alt text](/images/diagrama3.png) |
+| :--------------------------------: |
 
 Testando em um dispositivo de outra rede:
 
-<p style="text-align: center;">
-  <img src="/images/teste4.jpeg" alt="alt text"  width="200" height="400">
-</p>
+| ![alt text](/images/teste4.jpeg) |
+| :------------------------------: |
 
 Portanto temos agora a nossa aplicação funcionando e completa.
 
