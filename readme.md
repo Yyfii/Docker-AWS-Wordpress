@@ -334,19 +334,8 @@ Procure por Classic Load Balancer e clique em criar.
 
 Copie e acesse o DNS do load balancer no seu navegador.
 
-| ![alt text](/images/lbtest.png) |
-| :-----------------------------: |
-
-    Testando em outro dispositivo:
-
-<table>
-  <tr>
-    <td style="text-align: center;">
-      <img src="/images/lbtest2.jpeg" alt="alt text" width="200" height="400"> 
-      <br>
-    </td>
-  </tr>
-</table>
+| ![alt text](/images/lbtestes.png) |
+| :-------------------------------: |
 
     Já que o nosso Load Balancer está rodando, iremos dar inicio a criação do Auto Scaling.
 
@@ -384,7 +373,7 @@ Copie e acesse o DNS do load balancer no seu navegador.
   </tr>
 </table>
 
-    Testando em um dispositivo de outra rede:
+    Testando em um dispositivo de outra rede e na minha própria rede.
 
 ![alt text](/images/testes.png)
 
