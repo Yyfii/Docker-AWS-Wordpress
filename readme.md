@@ -390,7 +390,7 @@ Copie e acesse o DNS do load balancer no seu navegador.
   <tr>
     <td style="text-align: center;">
       <img src="/images/teste4.jpeg" alt="alt text" width="160" height="300" style="display: inline;">
-      <img src="/images/BH.png" alt="alt text" width="700" height="300" style="display: inline;">
+      <img src="/images/BH.png" alt="alt text" width="600" height="270" style="display: inline;">
     </td>
   </tr>
 </table>
