@@ -1,28 +1,13 @@
 services:
-
   wordpress:
     image: wordpress
     restart: always
     ports:
-      - 8080:80
+      - 80:80
     environment:
-      WORDPRESS_DB_HOST: rds
-      WORDPRESS_DB_USER: mainUser
-      WORDPRESS_DB_PASSWORD: mainPassword
-      WORDPRESS_DB_NAME: website
+      WORDPRESS_DB_HOST: <ENDPOINT RDS>:3306
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: MyNewPass1
+      WORDPRESS_DB_NAME: wordpress
     volumes:
-      - wordpress:/var/www/html
-  rds:
-    image: mysql:5.7
-    restart: always
-    environment:
-      MYSQL_DATABASE: website
-      MYSQL_USER: mainUser
-      MYSQL_PASSWORD: mainPassword
-      MYSQL_RANDOM_ROOT_PASSWORD: "1"
-    volumes:
-      - rds:/var/lib/mysql
-
-volumes:
-  wordpress:
-  rds:
+      - /mnt/efs:/var/www/html

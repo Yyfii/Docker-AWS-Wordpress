@@ -1,457 +1,140 @@
 # Docker e AWS - Wordpress.
 
-Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon RDS, Load Balancer.
+Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon RDS, Load Balancer, Auto Scaling.
 
-##### Passo 1: Testando o worpress localmente.
+---
 
-##### Passo 2: Testando o wordpress com o banco.
+##### Passo 1: Criando uma VPC.
 
-##### Passo 3: Criando uma instancia EC2.
+##### Passo 2: Criando os Security groups.
 
-##### Passo 4: Deletando uma instância EC2.
+##### Passo 3: Criando o RDS.
 
-##### Passo 5: Criando EC2 e User Data script.
+##### Passo 4: Criando o EFS.
 
-##### Passo 6: Conectando a instancia EC2 a um banco de dados Mysql.
+##### Passo 5: Criando e configurando o Nat Gateway.
 
-##### Passo 7: Conectando uma instancia Wordpress ao RDS.
+##### Passo 6: Organizando os endpoints no script user data.
 
-## Construindo um Container Wordpress
+##### Passo 7: Criando um Bastion Host.
 
-Siga os babies steps abaixo:
+##### Passo 8: Criando um launch template.
 
-## Passo 1: Testando o worpress localmente:
+##### Passo 9: Criando instancias.
 
-##### 1. Baixar a imagem (pode ser baixada durante a )
+##### Passo 10: Criando um Load Balancer.
 
-No link official da image : pull wordpress, mas por questões de eficiencia, podemos fazer o pull da imagem diretamente no run.
+##### Passo 10: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
 
-> `> docker run -d -p 3002:80 --name 
-wordpress_app_v2 wordpress`
+---
 
-- Esse comando está criando um container que está rodando em modo detached(no background), ou seja ele não vai ficar executando no terminal. `-p 3002:80`, a 3002 indica a porta que está sendo exposta no host para acessar a aplicação wordpress que está sendo exposta na porta 80(porta padrão da web).
-- Agora no browser: localhost:3002, é possível acessar a aplicação wordpress.
+##### Passo 1: Criando uma VPC.
 
-O Wordpress por padrão deve receber as informações de um banco de dados para que ele possa realizar consultas. O que configuraremos em breve.
-
-![alt text](images/wordpress.png)
-
-## Passo 2: Testando o wordpress com o banco.
-
-No site oficial: https://hub.docker.com/_/wordpress
-Tem um exemplo docker-compose.yml, copie e crie um arquivo .yml no seu diretório.
-
-- compose.yml
-
-```
-services:
-
-  wordpress:
-    image: wordpress
-    restart: always
-    ports:
-      - 8080:80
-    environment:
-      WORDPRESS_DB_HOST: rds
-      WORDPRESS_DB_USER: mainUser
-      WORDPRESS_DB_PASSWORD: mainPassword
-      WORDPRESS_DB_NAME: website
-      - wordpress:/var/www/html
-  rds:
-    image: mysql:5.7
-    restart: always
-    environment:
-      MYSQL_DATABASE: website
-      MYSQL_USER: mainUser
-      MYSQL_PASSWORD: mainPassword
-      MYSQL_RANDOM_ROOT_PASSWORD: "1"
-    volumes:
-      - rds:/var/lib/mysql
-
-volumes:
-  wordpress:
-  rds:
-
-```
-
-> docker-compose up
-
-Isso vai criar dois containers, um para o wordpress e outro para o mysql.
-O nosso objetivo agora é criar uma instancia EC2 que se conecte a esse container mysql.
-agora você pode acessar na porta 8080.
-
-> localhost:8080
-
-![alt text](images/wordpressHello.png)
-
-## Passo 3: Criando uma instancia EC2
-
-![alt text](images/ec2.png)
-
-- - EBS(Elastic Block Storage) : Armazenamento persistente.
-
-##### 1. Primeiramente é necessário uma conta AWS.
-
-##### 2. Uma vez, que você conseguiu logar na sua conta. Busque por EC2 (Elastic Compute Clouding).
-
-##### 3. Click em Launch Instances.
-
-3.1 Name -> o nome da sua ec2 - "ec2-wordpress"
-3.2 Escolher o OS(sistema operacional da sua ec2), Amazon Linux.
-3.3 Key pair: create new pair> RSA > .pem. (\*.pem para mac, linux e windows e .ppk para versões do windows menores que a versão 10) Create pair.
-
-Ele irá automaticamento baixar a keypair, você pode colocá-la na pasta do seu projeto. Ela pode ser usada para acesso ssh(remoto) da sua ec2.
-
-##### 3.4 Network settings > Security Groups > create security group > allow ssh traffic from anywhere 0.0.0.0/0 e allow http traffic from the internet.
-
-3.5 Launch Instance.
-
-Agora você tem uma instancia ec2 criada, clique em cima dela e na parte inferior e mostrará as informações sobre a ec2. Em detalhes busque por ipv4 público, copie-o, pois ele será usado para fazer o acesso remoto via ssh.
-
-Agora no seu diretório do projeto.
-
-Onde sua keypair está presente, abra com uma IDE de escolha, por exemplo estou usando o VSCode. Com o seu diretório aberto no vscode, abra um novo terminal e digite:
-
-> ssh -i video.pem ec2-user@<ip_publico_ec2>
-
-Pontos Importantes: Tenha certeza de que sua keypair esteja no mesmo diretorio em que você se encontre no terminal.
-
-- Se você encontrar o mesmo erro descrito na imagem abaixo:
-  ![alt text](images/errorSSH.png)
-
-Esse erro ocorre pois esse arquivo não deve ter permissões abertas para todos, já que se trata de uma chave de segurança. Portanto, ele não aceita uma keypair/chave de segurança que não está devidamente protegida, é uma forma de segurança.
-Para corrigir o erro:
-Vá até a sua pasta no Windows, clique com o botão direito no arquivo video.pem :
-
-###### Conceder acesso> Pessoas específicas> E escolha o proprietário apenas, compartilhe e pronto!
-
-Após isso, o comando deverá rodar novamente.
-
-![alt text](images/ec2running.jpeg)
-
-Agora, temos uma instancia EC2 rodando.
-Infelizmente devemos deletar a nossa instancia agora, pois ele serviu como um aprendizado para conhecer o processo de criação de uma EC2. Mas, é como dizem "Pods are cattle, not pets", não devemos tratar as nossas instancias como pets, elas devem servir ao nosso objetivo, o qual é o aprendizado.
-
-## Passo 4: Deletando uma instância EC2.
-
-Em instancias, clique na sua instancia.
-
-##### 1. Instancia State > Stop Instance.
-
-##### 2. Espere até que o estado dela passe de stopping para stopped, isso pode levar até 3 minutos.
-
-##### 3. Clique novamente em instance state > Terminate(delete) instance.
-
-Isso pode demorar um pouco, mas não se preocupe.
-
-## Passo 5: Criando EC2 e User Data script.
-
-- User data : é um setup bootstarp para configurar a ec2 durante a primeira launch(execução).
-
-##### EC2 User Data scripts são executados com a User Info
-
-##### 1. Launch Instance
-
-##### 1.2 Keypair : RSA, .pem > Criar par.
-
-##### 1.3 Network Settings.
-
-Nossa instancia vai ter um ip público, com um grupo de segurança(que vai controlar o tráfico da e para a nossa instancia ec2) e podemos adicionar rules(regras).
-
-1. SSH traffic from and HTTP traffic from the internet -> Anywhere (0.0.0.0/0)
-
-##### 1.4 Advanced Details
-
-##### User data
-
-Você pode criar um arquivo.sh e fazer o upload tbm, mas por motivos de aprendizado colocaremos manualmente.
-
-```
-#!/bin/bash
-#Install httpd
-yum install -y
-yum install -y httpd
-systemctl start httpd
-systemctl enable httpd
-echo "<h1> Hello World from $(hostname -f) </h1>" > /var/www/html/index.html
-```
-
-Cole o código acima no user data.
-
-![alt text](images/userdata.jpeg)
-
-Agora clique em Launch instance. Clique no link verde que aparece, ou procure por EC2 novamente e vá até running instances.
-Se você clicar na instancia, uma barra inferior com mais informações será mostrada, procure por IP público/public ipv4 address. Copie e cole em uma nova guia no browser:
-Ela pode demorar um pouco, pois ainda deve estar inicializando.
-
-![alt text](images/httpd-ec2-teste.jpeg)
-
-Conseguimos criar uma instancia e utilizar o User Data para instalar pacotes dentro dela.
-
-Agora iremos deletar a nossa instancia, pois o próximo passo é iniciá-la com o docker e com o wordpress. Mas, se você não quiser deletá-la, podemos prosseguir fazendo apenas a edição do user data.
-
-### Instaling docker compose
-
-> `sudo curl -L \
-https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) \ 
--o /usr/local/bin/docker-compose`
-
-> `sudo chmod +x /usr/local/bin/docker-compose` > https://www.baeldung.com/ops/docker-compose-not-found
-
-### Criando EC2 e usando o User data
-
-- User data : é um setup bootstrap para configurar a ec2 durante a primeira launch(execução). Nessa etapa temos como objetivo rodar o container wordpress dentro da EC2.
-
-Como que isso vai funcionar? Bom, primeiramente é importante entender que um container não possui comunicação com o mundo exterior e para que seja possível uma comunicação com ele/acessá-lo, devemos abrir uma de suas portas. Se criassemos um container na nossa máquina local, para acessá-lo, devemos expor uma de suas portas, e através do seu ip, podemos abrir a aplicação wordpress no browser:
-Examplo:
-
-> sudo docker run -d -p 8000:80 --name wordpress2 wordpress
-
-O comando acima cria um container wordpress, roda ele como um processo daemon(no background) e expõe as portas desse container: `8000` é a porta que ficará exposta para a máquina acessá-lo no browser, localhost:8000 e `80` é a porta que o container está rodando dentro de si mesmo, seria como se fosse o seu localhost.
-
-##### Pratica:
-
-> docker run -d -p 8000:80 --name wordpress2 wordpress
-> docker ps
-
-###### browser: localhost:8000
-
-![alt text](image.png)
-
-Agora, o nosso objetivo é rodar esse container dentro da EC2 e acessá-lo através do IP público da EC2.
-Quando vamos criar a nossa instância, a colocamos em um Security Group, e nele podemos adicionar regras, as inbounds e outbound. Security Groups são como firewalls para a EC2 e controlam a entrada e saída de tráfico. Inbound rules controlam a entrada e Outbound as saídas de tráfico. Os clientes são considerados inbound quando acessam um site. Então para expormos o wordpress procisamos configurar uma regra inbound no security group com a mesma porta que o container está compartilhando sua aplicação, então a instancia vai escutar nessa porta e vai abrir esse canal para que outros também a escutem.
-
-![alt text](images/ec2.drawio.png)
-
-##### 1. Busque por security groups:
-
-1.2 Create security group:
-
-![alt text](images/sg.jpeg)
-![alt text](images/sginbounds.jpeg)
-
-E clicar em criar grupo de segurança.
-
-##### 2. Launch Instance
-
-##### 2.1 Keypair :
-
-2.1.1 Criar novo par de chave/key pair
-2.1.2 Selecione RSA e .pem, crie a chave.
-2.1.3 Ele irá fazer o download da chave, coloque-a na pasta do diretório que você está trabalhando no momento, pois ela deve estar no mesmo diretório ao fazer o login na instancia.
-
-##### 2.2 Network Settings.
-
-Clique em selecionar grupo de seguranaça existente e selecione o criado anteriormente.
-
-##### 1.4 Advanced Details
-
-##### 1.4.1 User data
-
-Você pode criar um arquivo.sh e fazer o upload também, mas por motivos de aprendizado colocaremos manualmente.
-
-```
-
-#!/bin/bash
-#Install httpd
-yum install -y httpd git docker
-systemctl enable httpd
-systemctl start httpd
-systemctl enable docker
-systemctl start docker
-docker run -d -p 8000:80 --name wordpress_app2 wordpress
-```
-
-Agora você pode clicar em criar instancia.
-
-#### 2 Testando no browser:
-
-Vá na instancia, clique na mesma, e um menu inferior aparecerá, na seção instance summary, copie o ipv4 público. Ou nas opções em cima da lista de instancias, no botão de Connect, clique nele e o ip público também estará presente, copie-o.
-E cole no seu navegador.
-
-`<ip público>:8000`
-
-![alt text](images/teste-ec2-wordpress.jpeg)
-
-## Passo 6: Conectando a instancia EC2 a um banco de dados Mysql.
-
-1. Criar grupos de segurança/security groups.
-2. Criar RDS.
-3. Criar ec2-1
-4. Conectar ec2-1 ao RDS.
-5. Criar ec2-2.
-6. Testar conexão da ec2-2 com o RDS.
-
-### 1 Criar grupo de segurança/security group.
-
-#### 1.2 Security group do banco RDS.
+No seu AWS Console, busque por VPC, em seguida clique em criar VPC.
 
 - Especificações:
-  Nome: rds-database-1
-  Inbound rules: SSH(22);MYSQL/AURORA(3306)
+  - ###### Nome: WEB-WORDPRESS-VPC
+  - 2 AZ(Zonas de disponilidade)
+  - 3 subnets públicas e 2 privadas.
 
-Esse security group permitirá o acesso ssh/remoto e fará com que a comunicação com o banco seja na porta 3306 para todos. (Anywhere 0.0.0.0/0)
+![alt text](/images/VPC.jpeg)
 
-#### 1.3 Security group das EC2s.
+##### Passo 2: Criando os Security groups.
 
-- Especificações:
-  Nome: ec2-sg
-  Inbound rules:HTTP(80); SSH(22);Custom TCP (8080) Anywhere IPv4.
+Agora iremos criar os Security Groups(SG), iremos criar dois SG, um público, que será usado pelo Load Balancer e o Bastion Host. E um privado, que será usado, pelas instancias EC2, RDS e todos os resources que exigem níveis de seguranaça.
 
-Esse security group permitirá o acesso ssh, e ficará com as portas 80 e 8080 para comunicação web.
-
-### 2 Criar RDS.
-
-- Especificações:
-  Engine: Mysql; Templates: Free Tier; Settings.DB instance identifier: rds-database-1; Credentials settings: admin - MyNewPass1; Connectivity: Don´t connect to an EC2 compute resource. VPC security group. choose existing: rds-database-1. Additional configuration: backup (disable).
-
-### 3 Criar ec2-1
-
-- Especificações:
-  Name: ec2-1; key pair; Security group : ec2-sg.
-
-### 4 Conectar ec2-1 ao RDS.
-
-- Instancia(ec2-1) > Networking > RDS database (selecione o banco criado - rds-database-1)
-
-Copie o ip público da instância.
-
-```
-> ssh -i "suakeypair.pem" ec2-user@<ip instancia>
-> sudo dnf install mariadb105 -y
-> sudo mysql --version
-```
-
-Vá no seu RDS e copie o endpoint nos detalhes.
-
-```
-> sudo mysql -h <endpoint> -P 3306 -u admin -p
-Password: MyNewPass1
-mysql [none]> DROP DATABASE IF EXISTS wordpress;
-mysql [none]> CREATE DATABASE wordpress;
-mysql [none]> use wordpress;
-mysql [wordpress]> CREATE TABLE users(
-id integer primary key auto_increment,
-name varchar(255) not null,
-surname varchar(255) not null
-);
-mysql [wordpress]> INSERT INTO users(name, surname) values("Maria", "Josefina");
-```
-
-Agora, vá na sua vpc, detalhes e na seção de CIDRs, verifique o CIDR da vpc, por exemplo: 172.31.0.0.
-
-```
-mysql [wordpress]> CREATE USER 'maria'@'172.31.%.%' IDENTIFIED WITH mysql_native_password BY 'MyNewPass1';
-```
-
-O usuário maria só poderá ter acesso ao banco se estiver dentro da vpc.
-
-```
-mysql [wordpress]> GRANT ALL PRIVILEGES ON wordpress.* TO 'maria'@'172.31.%.%';
-mysql [wordpress]> SELECT * FROM users;
-```
-
-Se tudo estiver certo até aqui, agoar podemos testar a conexão deste banco em outra máquina dentro da vpc.
-
-### 5 Criar ec2-2.
-
-- Crie outra ec2, no mesmo security group da anterior, apenas com o nome diferente, defina o nome para ec2-2.
-
-Na instancia, após ser criada, conecte-a ao rds-database-1.
-
-### 6 Testar conexão da ec2-2 com o RDS.
-
-```
-> ssh -i "suakeypair.pem" ec2-user@<ip instancia>
-> sudo dnf install mariadb105 -y
-> sudo mysql --version
-> sudo mysql -h <endpoint> -P 3306 -u admin -p
-Password: MyNewPass1
-mysql [none]> use wordpress;
-mysql [wordpress]> SELECT * FROM users;
-```
-
-Se isso funcionou, então as suas instancias conseguem chegar até o rds. Então conseguimos com sucesso conectar as EC2s ao RDS.
-
-O nosso próximo passo é conectar uma instancia EC2 Wordpress com o banco RDS.
-
-## Passo 7: Conectando uma instancia Wordpress ao RDS.
-
-1. Criar VPC.
-2. Criar grupos de segurança.
-3. Criar RDS.
-4. Criar Instancia.
-5. Conectar instancia ao RDS.
-
-Esse é o nosso objetivo.
-![alt text](images/CONNECT-EC2-TO-RDS.jpeg)
-
-### 1 Criar VPC.
+![alt text](/images/SGs.jpeg)
 
 Vá para:
 
-##### VPC > Criar VPC
+##### `VPC > Security Groups > Criar Security Group`
 
 - Especificações:
-  VPC e mais, VPC-WORDPRESS, 10.0.0.0/16, AZ = 2, Subnets públicas = 2 , Subnets privadas = 2, Nat Gateway.
 
--> Criar
+  - ###### Nome: WEB-WORDPRESS-PUBLIC-SG
+  - VPC: WEB-WORDPRESS-VPC-vpc
+  - Inbound rules(regras de entrada): HTTP - 80 - 0.0.0.0/0 ; SSH - 22 - 0.0.0.0/0.
 
-### 2 Criar grupos de segurança.
+  - ###### Nome: WEB-WORDPRESS-PRIVATE-SG
+  - VPC: WEB-WORDPRESS-VPC-vpc
+  - Inbound rules(regras de entrada): Mysql/Aurora - 3306 - 0.0.0.0/0; HTTPS - 444 - WEB-WORDPRESS-PUBLIC-SG ; HTTP - 80 - WEB-WORDPRESS-PUBLIC-SG ; SSH - 22 - WEB-WORDPRESS-PUBLIC-SG; HTTPS - 443 - WEB-WORDPRESS-PUBLIC-SG.
 
-- Especificações:
-  Iremos criar dois grupos de segurança, um para a instancia que se conectará com o banco e outro para o RDS, para abrir sua porta para comunicação.
+Após ter criado os security groups, vá no WEB-WORDPRESS-PRIVATE-SG, em editar regras de entrada, e adicione a seguinte regra:
 
-##### VPC > Grupos de Segurança > Criar Grupo de sugurança
+- NFS - Source: WEB-WORDPRESS-PRIVATE-SG
 
-- Especificações:
-  Nome: wordpress-public-sg, VPC(VPC-WORDPRESS-vpc), Inbound rules (SSH, HTTP, HTTPS, Custom TCP (8080)) para Anywhere (0.0.0.0/0).
+##### Passo 3: Criando o RDS.
 
-![alt text](images/sg-ec2.jpeg)
-
--> Criar
-
-##### Grupos de Segurança > Criar Grupo de sugurança
+##### `RDS > Criar database`
 
 - Especificações:
-  Nome: wordpress-rds-sg, VPC(VPC-WORDPRESS-vpc), Inbound rules (MYSQL/AURORA) para Anywhere (0.0.0.0/0).
 
-![alt text](images/RDS-SG.jpeg)
+  - ###### WEB-WORDPRESS-RDS
+  - MYSQL.
+  - FreeTier.
+  - WEB-WORDPRESS-RDS
+  - Autenticação: Admin - MyNewPass1.
+  - db.t3.micro.
+  - Não conecte com uma EC2.
+  - WEB-WORDPRESS-VPC-vpc.
+  - SG : WEB-WORDPRESS-PRIVATE-SG.
+  - Configuração adicional: Banco de dados inicial: wordpress.
+  - ###### Criar banco.
 
--> Criar
+##### Passo 4: Criando o EFS.
 
-Agora temos os nossos grupos de segurança criados.
-
-### 3 Criar RDS.
-
-##### RDS > Criar banco de dados
-
-- Especificações:
-- - Standard create
-- - Mysql
-- - Free Tier
-- - DB identificador instancia: wordpress-rds
-- - admin - MyNewPass1
-- - db.t3.micro
-- - Não conect com uma ec2.
-- - VPC-WORDPRESS-vpc
-- - Grupo de segurança: wordpress-rds-sg
-- - Configuração adicional: banco de dados incial - `wordpress`.
-
--> Criar
-
-Espere o banco ser criado, e copie o seu endpoint. Pois ele será colocado do WORDPRESS_HOST no user data.
-
-![alt text](images/endpoint-database.jpeg)
-
-### 3 Criar Instancia.
+##### `EFS > Criar File System`
 
 - Especificações:
-- - ec2-wordpress
-- - vpc - VPC-WORDPRESS-vpc
-- - Auto-associar ip publico - habilitar
-- - Selecionar grupo de segurança existente: wordpress-public-sg
-- - `Detalhes avançados > User data:`
+
+  - ###### Nome: WEB-WORDPRESS-EFS.
+  - WEB-WORDPRESS-VPC-vpc.
+  - ###### Criar.
+
+Clique no file system criado, na seção de Network clique em manage e mude os security groups para o WEB-WORDPRESS-PRIVATE1-SG.
+
+![alt text](/images/efsconfig.png)
+
+##### Passo 5: Criando e configurando o Nat Gateway.
+
+O Nat Gateway vai permitir a conexão das instancias privadas com a internet.
+
+##### `VPC > Nat Gateways > Criar Nat Gateway`
+
+- Especificações:
+
+  - ###### Nome: WEB-WORDPRESS-NAT-GATEWAY.
+  - Subnet: WEB-WORDPRESS-VPC-subnet-public1-us-east-1a.
+  - Tipo de Conectividade: Publica.
+  - Clicar em Alocar IP Elastico.
+  - WEB-WORDPRESS-VPC-vpc.
+
+  ![alt text](/images/nat-gateway.jpeg)
+
+  - ###### Criar.
+
+Agora iremos associar o nat gateway às subnets privadas através da route table.
+
+##### `VPC > Route tables`
+
+- Na subnet: WEB-WORDPRESS-VPC-rtb-private1-us-east-1a:
+  - Clique na subnet, e vá na seção Routes
+    ![alt text](/images/rotas.jpeg)
+  - Editar rotas, clique em nova rota, e coloque `0.0.0.0/0` como destino e Nat Gateway como target, em seguida selecione o nat gateway criado anteriormente.
+    ![alt text](/images/editRoutes.jpeg)
+- Na subnet: WEB-WORDPRESS-VPC-rtb-private2-us-east-1b, faça o mesmo processo.
+
+##### Passo 6: Organizando os endpoints no script user data.
+
+No nosso user data usamos dois endpoints, um do RDS e outro do EFS.
+
+- Copie o user data abaixo e colo em um editor de código, ou qualquer outro editor de texto.
+
+- Vá no seu RDS criado, clique nele, e na seção Conectivade e segurança, copie o endpoint.
+- No user data que está no seu editor de texto, vá no `<ENDPOINT RDS>` e substitua pelo endpoint do RDS.
+
+- Vá no EFS criado, clique nele, clique em `Attach/anexar`, e copie o comando abaixo de `Usando o client NFS`.
+- No user data procure a linha que inicia com `sudo mount -t nfs4`, substitua-a pelo comando que você copiou. E no final do comando onde tiver `:/ efs`, substitiua por `:/ /mnt/efs`.
 
 ```
 #!/bin/bash
@@ -460,8 +143,7 @@ Espere o banco ser criado, e copie o seu endpoint. Pois ele será colocado do WO
 yum update -y
 
 # Instala o git e o docker
-yum install git docker -y
-
+yum install git docker amazon-efs-utils  -y
 # Inicia o docker e instala o docker compose
 systemctl enable docker
 systemctl start docker
@@ -469,8 +151,8 @@ sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 
 # Cria uma pasta no diretório raiz, para que o compose.yml não fique nos arquivos temporarios
-cd /
-mkdir files
+
+mkdir -p  /files
 
 # Cria um arquivo compose.yml na pasta files
 cat <<EOF> /files/compose.yml
@@ -479,41 +161,189 @@ services:
     image: wordpress
     restart: always
     ports:
-      - 8080:80
+      - 80:80
     environment:
-      WORDPRESS_DB_HOST: <ENDPOINT COPIADO>:3306
+      WORDPRESS_DB_HOST: <ENDPOINT RDS>:3306
       WORDPRESS_DB_USER: admin
       WORDPRESS_DB_PASSWORD: MyNewPass1
       WORDPRESS_DB_NAME: wordpress
     volumes:
-      - wordpress:/var/www/html
-volumes:
-  wordpress:
+      - /mnt/efs:/var/www/html
 EOF
 
-# Executa o compose.yml, criando assim o container wordpress
+sudo mkdir -p /mnt/efs
+
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-05cf370359e4902e5.efs.us-east-1.amazonaws.com:/ /mnt/efs
+
+
 sudo docker-compose -f /files/compose.yml up -d
+
 ```
 
--> Criar
+Verifique todos os seus endpoints antes de prosseguir.
 
-Agora nas instancias, selecione sua instancia:
+##### Passo 7: Criando um Bastion Host.
 
-##### Instancia > Ações > Networking > Connect RDS Database.
+Por questões de segurança, criamos uma máquina que possa acessar as nossas instancias privadas, e também para testar o nosso script user data.
 
-![alt text](images/ec2-connect.jpeg)
+##### `EC2 > Instancias > Launch Instances`
 
-E clique em conectar/connect.
+- Especificações:
 
-Agora na sua instancia, cheque se o status está como `2/2 checks passed´, se sim então ela já está pronto.
-Vá em detalhes e copie o ip público da instancia.
+  - ###### Nome: WEB-WORDPRESS-BASTION-HOST.
+  - Key pair : pbnov24
+  - Editar configurações de rede: WEB-WORDPRESS-VPC;
+  - Subnet-public1-us-east-1a;
+  - Habilitar IP Público;
+  - Selecionar SG: WEB-WORDPRESS-PUBLIC-SG.
+  - Detalhes avançados, User data: Cole o seu user data no campo.
+  - ###### Launch Instance.
 
-No browser: `<ip>:8080`
+Espere a instancia ficar com o status checked.
 
-![alt text](images/status-instancia.jpeg)
+Clique na instancia, Copie o IP Público dela e cole no seu navegador.
 
-E note que agora ela não pede mais informações sobre o banco.
+Ela pode demorar um pouco pra carregar por conta de ainda estar iniciando o container. Então enquanto ela carrega você pode seguir para o próximo passo.
 
-![alt text](images/status-banco.jpeg)
+Deve aparecer a página inicial do Wordpress.
 
-E com isso conseguimos conectar a nossa instancia EC2 com o RDS.
+![alt text](/images/BH.png)
+
+##### Passo 8: Criando um launch template.
+
+##### `Instancias > Launch Templates > Launch Instances > Criar template`
+
+- Especificações:
+
+  - ###### Nome: WEB-WORDPRESS-SERVERS.
+  - Quick start: Amazon Linux
+  - t2.micro
+  - Key pair : pbnov24
+  - Não selecione a subnet.
+  - Selecionar SG: WEB-WORDPRESS-PRIVATE-SG.
+  - Detalhes avançados, User data: Cole o seu user data no campo.
+  - ###### Launch Instance.
+
+##### Passo 9: Criando instancias.
+
+##### `Instancias > Launch Instance.Launch Instance from template`
+
+Selecione o template criado.
+
+- Especificações:
+  - Subnet: WEB-WORDPESS-VPC-subnet-private1-us-east-1a.
+
+Cheque se todos os campos estão ok, principalmente o SG e o user data.
+
+- ###### Launch Instance.
+
+Agora iremos verificar se a instancia está ok, acessando-a pelo Bastion Host.
+
+![alt text](/images/accessSSHBH.png)
+
+Clique em conect, e ele irá abrir dentro do BastionHost.
+
+Iremos agora fazer o acesso ssh da instancia privada.
+
+Abra a sua keypair utilizada na instancia e cole no arquivo pbnov24 aberto pelo nano, `Ctrl + o` e Enter e depois `Ctrl + x` para sair.
+Copie o Ip privado da instancia criada.
+` sudo ssh -i "pbnov24" ec2-user@<ip privado da instancia>`
+
+![alt text](/images/sshS1.png)
+
+Siga os comonados da imagem acima.
+
+```
+> cd .ssh
+> nano pbnov24 #cole o conteúdo da sua keypair
+> ls
+> sudo ssh -i "pbnov24" ec2-user@<ip privado da instancia>
+```
+
+![alt text](/images/sshprivate.png)
+
+Siga os comonados da imagem acima.
+
+```
+> sudo docker ps
+> cd /mnt
+> df -h
+```
+
+Observe se o seu mount está ok. Se o seu Bastion Host está mostrando o wordpress e o seu mount está mostrando o link do efs amazon, então agora nos resta apenas criar um Load Balancer e o Auto Scaling.
+
+##### Passo 10: Criando um Load Balancer.
+
+##### `Load Balancers > Criar Load Balancer`
+
+Procure por Classic Load Balancer e clique em criar.
+
+- Especificações:
+- ###### Nome: WEB-WORDPRESS-CLB.
+- Internet-facing.
+- Network mapping: WEB-WORDPRESS-VPC, Selecione as duas az e coloque a subnte public.
+- SG: WEB-WORDPRESS-PUBLIC-SG.
+- Healthy checks: /wp-admin/install.php
+
+- ###### Criar.
+
+- Agora crie outra instancia usando o template WEB-WORDPRESS-SERVERS para testarmos o Load Balancer.
+
+![alt text](/images/instances.png)
+
+- Neste mommento o que nos resta é associar as instancias criadas para verificar se o Load Balancer está de fato funcionando.
+
+##### `Load Balancers > WEB-WORDPRESS-CLB > Seção no LB de Target Instances > Manage Instances`
+
+- Vá para a seção de target Instances, Manage Instances.
+
+![alt text](/images/manageInstances.png)
+
+- Agora na targe=t Instances, verifique se o Healthy status das instancias está In-Service.
+
+Copie e acesse o DNS do load balancer no seu navegador.
+
+![alt text](/images/lbtest.png)
+
+Testando em outro dispositivo:
+
+![alt text](/images/lbtest2.jpeg)
+
+Já que o nosso Load Balancer está rodando, iremos dar inicio a criação do Auto Scaling.
+
+Até agora temos:
+
+![alt text](/images/diagrama.png)
+
+##### Passo 10: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
+
+##### `Auto Scaling groups> Criar Auto Scaling group >`
+
+- Especificações:
+- ###### Nome: WEB-WORDPRESS-ASG.
+- Selecione o Launch template WEB-WORDPRESS-SERVERS.
+- WEB-WORDPRESS-VPC
+- Selecione as subnets privadas.
+- Anexar a um Load Balancer existente.
+- Escolher Classic Load Balancer: WEB-WORDPRESS-CLB.
+- Habilitar ELB health checks.
+- Group size: Capacidade desejada (2), Min(1), Max(2).
+- Target tracking scaling policy: Average CPU utilization (target - 70, 200s), a média de utilização da CPU será 70% e ele avaliará as métricas com uma janela de 200 segundos.
+- Terminate and Launch.
+- Enable group metrics collection within CloudWatch.
+- Add Notification: ex: my-sns-topic(seuemail@gmai.com).
+
+- ###### Criar.
+
+Vá no link DNS aberto do Load balancer e faça o refresh ou recarregue com F5. Se você for nas suas instancias, o número delas deve ter aumentado.
+
+![alt text](/images/teste.png)
+
+Agora, a estrutura do nosso projeto
+![alt text](/images/diagrama3.png)
+
+Testando em um dispositivo de outra rede:
+
+![alt text](/images/teste4.jpeg)
+
+Portanto temos agora a nossa aplicação funcionando e completa.
