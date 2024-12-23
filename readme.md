@@ -337,16 +337,18 @@ Copie e acesse o DNS do load balancer no seu navegador.
 | ![alt text](/images/lbtest.png) |
 | :-----------------------------: |
 
-Testando em outro dispositivo:
+    Testando em outro dispositivo:
 
 <table>
   <tr>
     <td style="text-align: center;">
       <img src="/images/lbtest2.jpeg" alt="alt text" width="200" height="400"> 
-      <br>Já que o nosso Load Balancer está rodando, iremos dar inicio a criação do Auto Scaling.
+      <br>
     </td>
   </tr>
 </table>
+
+    Já que o nosso Load Balancer está rodando, iremos dar inicio a criação do Auto Scaling.
 
 <table>
   <tr>
@@ -368,31 +370,31 @@ Testando em outro dispositivo:
 
 - ###### Criar.
 
-Vá no link DNS aberto do Load balancer e faça o refresh ou recarregue com F5. Se você for nas suas instancias, o número delas deve ter aumentado.
+  Vá no link DNS aberto do Load balancer e faça o refresh ou recarregue com F5. Se você for nas suas instancias, o número delas deve ter aumentado.
 
 ![alt text](/images/teste.png)
+
+    Agora, a estrutura do nosso projeto
 
 <table>
   <tr>
     <td style="text-align: center;">
-    Agora, a estrutura do nosso projeto
-    <br>
-      <img src="/images/diagrama3.png" alt="alt text" width="500" height="600">
+          <img src="/images/diagrama3.png" alt="alt text" width="500" height="600">
     </td>
   </tr>
 </table>
 
+    Testando em um dispositivo de outra rede:
+
 <table>
   <tr>
     <td style="text-align: center;">
-    Testando em um dispositivo de outra rede:
-    <br>
       <img src="/images/teste4.jpeg" alt="alt text" width="200" height="400">
     </td>
   </tr>
 </table>
 
-Portanto temos agora a nossa aplicação funcionando e completa.
-
 | ![alt text](/images/BH.png) |
 | :-------------------------: |
+
+Portanto temos agora a nossa aplicação funcionando e completa.
