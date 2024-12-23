@@ -41,9 +41,11 @@ No seu AWS Console, busque por VPC, em seguida clique em criar VPC.
 
 ##### Passo 2: Criando os Security groups.
 
-Agora iremos criar os Security Groups(SG), iremos criar dois SG, um público, que será usado pelo Load Balancer e o Bastion Host. E um privado, que será usado, pelas instancias EC2, RDS e todos os resources que exigem níveis de seguranaça.
+Agora iremos criar os **Security Groups(SG)**, iremos criar dois SG, um público, que será usado pelo Load Balancer e o Bastion Host. E um privado, que será usado, pelas instancias EC2, RDS e todos os resources que exigem níveis de seguranaça.
 
-![alt text](/images/SGs.jpeg)
+<p style="text-align: center;">
+  <img src="/images/SGs.jpeg" alt="alt text"  width="450" height="400">
+</p>
 
 Vá para:
 
@@ -51,92 +53,102 @@ Vá para:
 
 - Especificações:
 
-  - ###### Nome: WEB-WORDPRESS-PUBLIC-SG
-  - VPC: WEB-WORDPRESS-VPC-vpc
-  - Inbound rules(regras de entrada): HTTP - 80 - 0.0.0.0/0 ; SSH - 22 - 0.0.0.0/0.
+| **Nome**                 | **VPC**               | **Inbound Rules**                                                                                                                                                                                                               |
+| ------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **Mysql/Aurora**: 3306 - 0.0.0.0/0 <br> - **HTTPS**: 444 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG |
 
-  - ###### Nome: WEB-WORDPRESS-PRIVATE-SG
-  - VPC: WEB-WORDPRESS-VPC-vpc
-  - Inbound rules(regras de entrada): Mysql/Aurora - 3306 - 0.0.0.0/0; HTTPS - 444 - WEB-WORDPRESS-PUBLIC-SG ; HTTP - 80 - WEB-WORDPRESS-PUBLIC-SG ; SSH - 22 - WEB-WORDPRESS-PUBLIC-SG; HTTPS - 443 - WEB-WORDPRESS-PUBLIC-SG.
-
-Após ter criado os security groups, vá no WEB-WORDPRESS-PRIVATE-SG, em editar regras de entrada, e adicione a seguinte regra:
+Após ter criado os security groups, vá no **WEB-WORDPRESS-PRIVATE-SG**, em editar regras de entrada, e adicione a seguinte regra:
 
 - NFS - Source: WEB-WORDPRESS-PRIVATE-SG
+
+| **Nome**                 | **VPC**               | **Inbound Rules**                                                                                                                                                                                                                                                               |
+| ------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **NFS**: 2049 - WEB-WORDPRESS-PRIVATE-SG <br> - **Mysql/Aurora**: 3306 - 0.0.0.0/0 <br> - **HTTPS**: 444 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG |
 
 ##### Passo 3: Criando o RDS.
 
 ##### `RDS > Criar database`
 
-- Especificações:
+- **Especificações:**
 
-  - ###### WEB-WORDPRESS-RDS
-  - MYSQL.
-  - FreeTier.
-  - WEB-WORDPRESS-RDS
-  - Autenticação: Admin - MyNewPass1.
-  - db.t3.micro.
-  - Não conecte com uma EC2.
-  - WEB-WORDPRESS-VPC-vpc.
-  - SG : WEB-WORDPRESS-PRIVATE-SG.
-  - Configuração adicional: Banco de dados inicial: wordpress.
-  - ###### Criar banco.
+| **..**                     | **..**                            |
+| -------------------------- | --------------------------------- |
+| **Nome**                   | WEB-WORDPRESS-RDS                 |
+| **Tipo de Banco de Dados** | MYSQL                             |
+| **Plano**                  | FreeTier                          |
+| **Nome do Banco de Dados** | wordpress                         |
+| **Autenticação**           | Admin - MyNewPass1                |
+| **Tipo de Instância**      | db.t3.micro                       |
+| **Conexão com EC2**        | Não conectado                     |
+| **VPC**                    | WEB-WORDPRESS-VPC-vpc             |
+| **Security Group**         | WEB-WORDPRESS-PRIVATE-SG          |
+| **Configuração Adicional** | Banco de dados inicial: wordpress |
+
+- ###### Criar banco.
 
 ##### Passo 4: Criando o EFS.
 
 ##### `EFS > Criar File System`
 
-- Especificações:
+- **Especificações:**
 
-  - ###### Nome: WEB-WORDPRESS-EFS.
-  - WEB-WORDPRESS-VPC-vpc.
-  - ###### Criar.
+| **..**   | **..**                |
+| -------- | --------------------- |
+| **Nome** | WEB-WORDPRESS-EFS     |
+| **VPC**  | WEB-WORDPRESS-VPC-vpc |
 
-Clique no file system criado, na seção de Network clique em manage e mude os security groups para o WEB-WORDPRESS-PRIVATE1-SG.
+- ###### Criar.
+
+Clique no **file system** criado, na seção de Network clique em manage e mude os security groups para o **WEB-WORDPRESS-PRIVATE1-SG**.
 
 ![alt text](/images/efsconfig.png)
 
 ##### Passo 5: Criando e configurando o Nat Gateway.
 
-O Nat Gateway vai permitir a conexão das instancias privadas com a internet.
+O **Nat Gateway** vai permitir a conexão das instancias privadas com a internet.
 
 ##### `VPC > Nat Gateways > Criar Nat Gateway`
 
-- Especificações:
+- **Especificações:**
 
-  - ###### Nome: WEB-WORDPRESS-NAT-GATEWAY.
-  - Subnet: WEB-WORDPRESS-VPC-subnet-public1-us-east-1a.
-  - Tipo de Conectividade: Publica.
-  - Clicar em Alocar IP Elastico.
-  - WEB-WORDPRESS-VPC-vpc.
+| **..**                    | **..**                                      |
+| ------------------------- | ------------------------------------------- |
+| **Nome**                  | WEB-WORDPRESS-NAT-GATEWAY                   |
+| **Subnet**                | WEB-WORDPRESS-VPC-subnet-public1-us-east-1a |
+| **Tipo de Conectividade** | Publica                                     |
+| **Ação**                  | Clicar em Alocar IP Elastico                |
+| **VPC**                   | WEB-WORDPRESS-VPC-vpc                       |
 
-  ![alt text](/images/nat-gateway.jpeg)
+![alt text](/images/nat-gateway.jpeg)
 
-  - ###### Criar.
+- ###### Criar.
 
 Agora iremos associar o nat gateway às subnets privadas através da route table.
 
 ##### `VPC > Route tables`
 
-- Na subnet: WEB-WORDPRESS-VPC-rtb-private1-us-east-1a:
-  - Clique na subnet, e vá na seção Routes
-    ![alt text](/images/rotas.jpeg)
-  - Editar rotas, clique em nova rota, e coloque `0.0.0.0/0` como destino e Nat Gateway como target, em seguida selecione o nat gateway criado anteriormente.
-    ![alt text](/images/editRoutes.jpeg)
-- Na subnet: WEB-WORDPRESS-VPC-rtb-private2-us-east-1b, faça o mesmo processo.
+- **Na subnet**: WEB-WORDPRESS-VPC-rtb-private1-us-east-1a:
+
+  - Clique na subnet e vá na seção **Routes**.
+    ![Rotas](images/rotas.jpeg)
+  - Edite as rotas, clique em **Nova Rota**, e coloque `0.0.0.0/0` como destino e **Nat Gateway** como target, em seguida selecione o NAT Gateway criado anteriormente.
+    ![Editar Rotas](images/editRoutes.jpeg)
+
+- **Na subnet**: WEB-WORDPRESS-VPC-rtb-private2-us-east-1b, faça o mesmo processo.
 
 ##### Passo 6: Organizando os endpoints no script user data.
 
 No nosso user data usamos dois endpoints, um do RDS e outro do EFS.
 
-- Copie o user data abaixo e colo em um editor de código, ou qualquer outro editor de texto.
+- Copie o **user data** abaixo e colo em um editor de código, ou qualquer outro editor de texto.
 
-- Vá no seu RDS criado, clique nele, e na seção Conectivade e segurança, copie o endpoint.
-- No user data que está no seu editor de texto, vá no `<ENDPOINT RDS>` e substitua pelo endpoint do RDS.
+- Vá no seu **RDS** criado, clique nele, e na seção Conectivade e segurança, copie o endpoint.
+- No user data que está no seu editor de texto, vá no `<ENDPOINT RDS>` e substitua pelo **endpoint** do RDS.
 
-- Vá no EFS criado, clique nele, clique em `Attach/anexar`, e copie o comando abaixo de `Usando o client NFS`.
+- Vá no **EFS** criado, clique nele, clique em `Attach/anexar`, e copie o comando abaixo de `Usando o client NFS`.
 - No user data procure a linha que inicia com `sudo mount -t nfs4`, substitua-a pelo comando que você copiou. E no final do comando onde tiver `:/ efs`, substitiua por `:/ /mnt/efs`.
 
-```
+```sh
 #!/bin/bash
 
 # Atualiza os pacotes da maquina
@@ -190,24 +202,29 @@ Por questões de segurança, criamos uma máquina que possa acessar as nossas in
 
 - Especificações:
 
-  - ###### Nome: WEB-WORDPRESS-BASTION-HOST.
-  - Key pair : pbnov24
-  - Editar configurações de rede: WEB-WORDPRESS-VPC;
-  - Subnet-public1-us-east-1a;
-  - Habilitar IP Público;
-  - Selecionar SG: WEB-WORDPRESS-PUBLIC-SG.
-  - Detalhes avançados, User data: Cole o seu user data no campo.
-  - ###### Launch Instance.
+| **..**                           | **..**                                   |
+| -------------------------------- | ---------------------------------------- |
+| **Nome**                         | WEB-WORDPRESS-BASTION-HOST               |
+| **Key pair**                     | pbnov24                                  |
+| **Editar configurações de rede** | WEB-WORDPRESS-VPC                        |
+| **Subnet**                       | subnet-public1-us-east-1a                |
+| **Habilitar IP Público**         | Sim                                      |
+| **Selecionar SG**                | WEB-WORDPRESS-PUBLIC-SG                  |
+| **Detalhes avançados**           | User data: Cole o seu user data no campo |
 
-Espere a instancia ficar com o status checked.
+- ###### Launch Instance.
 
-Clique na instancia, Copie o IP Público dela e cole no seu navegador.
+Espere a instancia ficar com o **status checked**.
+
+Clique na instancia, Copie o **IP Público** dela e cole no seu navegador.
 
 Ela pode demorar um pouco pra carregar por conta de ainda estar iniciando o container. Então enquanto ela carrega você pode seguir para o próximo passo.
 
-Deve aparecer a página inicial do Wordpress.
+Ela deve mostrar a página inicial do Wordpress.
 
-![alt text](/images/BH.png)
+<p style="text-align: center;">
+  <img src="/images/BH.png" alt="alt text"  width="500" height="260">
+</p>
 
 ##### Passo 8: Criando um launch template.
 
@@ -215,13 +232,16 @@ Deve aparecer a página inicial do Wordpress.
 
 - Especificações:
 
-  - ###### Nome: WEB-WORDPRESS-SERVERS.
-  - Quick start: Amazon Linux
-  - t2.micro
-  - Key pair : pbnov24
-  - Não selecione a subnet.
-  - Selecionar SG: WEB-WORDPRESS-PRIVATE-SG.
-  - Detalhes avançados, User data: Cole o seu user data no campo.
+  | **Especificação**      | **Valor**                                |
+  | ---------------------- | ---------------------------------------- |
+  | **Nome**               | WEB-WORDPRESS-SERVERS                    |
+  | **Quick start**        | Amazon Linux                             |
+  | **Tipo de instância**  | t2.micro                                 |
+  | **Key pair**           | pbnov24                                  |
+  | **Subnet**             | Não selecione a subnet                   |
+  | **Selecionar SG**      | WEB-WORDPRESS-PRIVATE-SG                 |
+  | **Detalhes avançados** | User data: Cole o seu user data no campo |
+
   - ###### Launch Instance.
 
 ##### Passo 9: Criando instancias.
@@ -231,13 +251,15 @@ Deve aparecer a página inicial do Wordpress.
 Selecione o template criado.
 
 - Especificações:
-  - Subnet: WEB-WORDPESS-VPC-subnet-private1-us-east-1a.
+  | **..** | **..** |
+  |------------------------------------|--------------------------------------------------------|
+  | **Subnet** | WEB-WORDPESS-VPC-subnet-private1-us-east-1a |
 
-Cheque se todos os campos estão ok, principalmente o SG e o user data.
+**Cheque se todos os campos estão corretos, principalmente o SG e o user data.**
 
 - ###### Launch Instance.
 
-Agora iremos verificar se a instancia está ok, acessando-a pelo Bastion Host.
+Agora iremos verificar se a instancia está correta, acessando-a pelo **Bastion Host**.
 
 ![alt text](/images/accessSSHBH.png)
 
@@ -245,32 +267,36 @@ Clique em conect, e ele irá abrir dentro do BastionHost.
 
 Iremos agora fazer o acesso ssh da instancia privada.
 
-Abra a sua keypair utilizada na instancia e cole no arquivo pbnov24 aberto pelo nano, `Ctrl + o` e Enter e depois `Ctrl + x` para sair.
+Abra a sua keypair utilizada na instancia e cole no arquivo **pbnov24** aberto pelo nano, `Ctrl + o` e Enter e depois `Ctrl + x` para sair.
 Copie o Ip privado da instancia criada.
 ` sudo ssh -i "pbnov24" ec2-user@<ip privado da instancia>`
 
-![alt text](/images/sshS1.png)
+<p style="text-align: center;">
+  <img src="/images/sshS1.png" alt="alt text"  width="500" height="200">
+</p>
 
 Siga os comonados da imagem acima.
 
-```
-> cd .ssh
-> nano pbnov24 #cole o conteúdo da sua keypair
-> ls
-> sudo ssh -i "pbnov24" ec2-user@<ip privado da instancia>
+```bash
+cd .ssh
+nano pbnov24 #cole o conteúdo da sua keypair
+ls
+sudo ssh -i "pbnov24" ec2-user@<ip privado da instancia>
 ```
 
-![alt text](/images/sshprivate.png)
+<p style="text-align: center;">
+  <img src="/images/sshprivate.png" alt="alt text"  width="700" height="260">
+</p>
 
 Siga os comonados da imagem acima.
 
-```
-> sudo docker ps
-> cd /mnt
-> df -h
+```bash
+sudo docker ps
+cd /mnt
+df -h
 ```
 
-Observe se o seu mount está ok. Se o seu Bastion Host está mostrando o wordpress e o seu mount está mostrando o link do efs amazon, então agora nos resta apenas criar um Load Balancer e o Auto Scaling.
+Observe se o seu mount está correto. Se o seu Bastion Host está mostrando o wordpress e o seu mount está mostrando o link do efs amazon, então agora nos resta apenas criar um Load Balancer e o Auto Scaling.
 
 ##### Passo 10: Criando um Load Balancer.
 
@@ -278,12 +304,9 @@ Observe se o seu mount está ok. Se o seu Bastion Host está mostrando o wordpre
 
 Procure por Classic Load Balancer e clique em criar.
 
-- Especificações:
-- ###### Nome: WEB-WORDPRESS-CLB.
-- Internet-facing.
-- Network mapping: WEB-WORDPRESS-VPC, Selecione as duas az e coloque a subnte public.
-- SG: WEB-WORDPRESS-PUBLIC-SG.
-- Healthy checks: /wp-admin/install.php
+| **Nome**          | **Especificações**                                                                                                                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| WEB-WORDPRESS-CLB | - **Internet-facing** <br> - **Network mapping**: WEB-WORDPRESS-VPC, Selecione as duas AZ e coloque a subnet pública <br> - **SG**: WEB-WORDPRESS-PUBLIC-SG <br> - **Healthy checks**: /wp-admin/install.php |
 
 - ###### Criar.
 
@@ -299,39 +322,35 @@ Procure por Classic Load Balancer e clique em criar.
 
 ![alt text](/images/manageInstances.png)
 
-- Agora na targe=t Instances, verifique se o Healthy status das instancias está In-Service.
+- Agora na target Instances, verifique se o Healthy status das instancias está In-Service.
 
 Copie e acesse o DNS do load balancer no seu navegador.
 
-![alt text](/images/lbtest.png)
+<p style="text-align: center;">
+  <img src="/images/lbtest.png" alt="alt text"  width="450" height="260">
+</p>
 
 Testando em outro dispositivo:
 
-![alt text](/images/lbtest2.jpeg)
+<p style="text-align: center;">
+  <img src="/images/lbtest2.jpeg" alt="alt text"  width="200" height="400">
+</p>
 
 Já que o nosso Load Balancer está rodando, iremos dar inicio a criação do Auto Scaling.
 
 Até agora temos:
 
-![alt text](/images/diagrama.png)
+<p style="text-align: center;">
+  <img src="/images/diagrama.png" alt="alt text"  width="450" height="600">
+</p>
 
 ##### Passo 11: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
 
 ##### `Auto Scaling groups> Criar Auto Scaling group >`
 
-- Especificações:
-- ###### Nome: WEB-WORDPRESS-ASG.
-- Selecione o Launch template WEB-WORDPRESS-SERVERS.
-- WEB-WORDPRESS-VPC
-- Selecione as subnets privadas.
-- Anexar a um Load Balancer existente.
-- Escolher Classic Load Balancer: WEB-WORDPRESS-CLB.
-- Habilitar ELB health checks.
-- Group size: Capacidade desejada (2), Min(1), Max(2).
-- Target tracking scaling policy: Average CPU utilization (target - 70, 200s), a média de utilização da CPU será 70% e ele avaliará as métricas com uma janela de 200 segundos.
-- Terminate and Launch.
-- Enable group metrics collection within CloudWatch.
-- Add Notification: ex: my-sns-topic(seuemail@gmai.com).
+| **Nome**          | **Especificações**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WEB-WORDPRESS-ASG | - **Selecione o Launch template**: WEB-WORDPRESS-SERVERS <br> - **VPC**: WEB-WORDPRESS-VPC <br> - **Selecione as subnets**: privadas <br> - **Anexar a um Load Balancer existente**: WEB-WORDPRESS-CLB <br> - **Habilitar ELB health checks** <br> - **Group size**: Capacidade desejada (2), Min(1), Max(2) <br> - **Target tracking scaling policy**: Average CPU utilization (target - 70, 200s) <br> - **Terminate and Launch** <br> - **Enable group metrics collection within CloudWatch** <br> - **Add Notification**: Ex: my-sns-topic(seuemail@gmai.com) |
 
 - ###### Criar.
 
@@ -340,10 +359,15 @@ Vá no link DNS aberto do Load balancer e faça o refresh ou recarregue com F5. 
 ![alt text](/images/teste.png)
 
 Agora, a estrutura do nosso projeto
-![alt text](/images/diagrama3.png)
+
+<p style="text-align: center;">
+  <img src="/images/diagrama3.png" alt="alt text"  width="450" height="600">
+</p>
 
 Testando em um dispositivo de outra rede:
 
-![alt text](/images/teste4.jpeg)
+<p style="text-align: center;">
+  <img src="/images/teste4.jpeg" alt="alt text"  width="200" height="400">
+</p>
 
 Portanto temos agora a nossa aplicação funcionando e completa.
