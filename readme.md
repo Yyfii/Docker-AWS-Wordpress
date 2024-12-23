@@ -390,11 +390,9 @@ Copie e acesse o DNS do load balancer no seu navegador.
   <tr>
     <td style="text-align: center;">
       <img src="/images/teste4.jpeg" alt="alt text" width="200" height="400">
+      <img src="/images/BH.png" alt="alt text" width="600" height="300">
     </td>
   </tr>
 </table>
-
-| ![alt text](/images/BH.png) |
-| :-------------------------: |
 
 Portanto temos agora a nossa aplicação funcionando e completa.
