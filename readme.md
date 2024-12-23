@@ -41,6 +41,9 @@ No seu AWS Console, busque por VPC, em seguida clique em criar VPC.
 | ![alt text](/images/VPC.jpeg) |
 | :---------------------------: |
 
+| <img src="/images/VPC.jpeg" alt="alt text" width="900" height="500"> |
+| :------------------------------------------------------------------: |
+
 ##### Passo 2: Criando os Security groups.
 
 Agora iremos criar os **Security Groups(SG)**, iremos criar dois SG, um público, que será usado pelo Load Balancer e o Bastion Host. E um privado, que será usado, pelas instancias EC2, RDS e todos os resources que exigem níveis de seguranaça.
