@@ -41,7 +41,7 @@ No seu AWS Console, busque por VPC, em seguida clique em criar VPC.
 | ![alt text](/images/VPC.jpeg) |
 | :---------------------------: |
 
-| <img src="/images/VPC.jpeg" alt="alt text" width="900" height="500"> |
+| <img src="/images/VPC.jpeg" alt="alt text" width="800" height="400"> |
 | :------------------------------------------------------------------: |
 
 ##### Passo 2: Criando os Security groups.
