@@ -334,20 +334,29 @@ Procure por Classic Load Balancer e clique em criar.
 
 Copie e acesse o DNS do load balancer no seu navegador.
 
-| ![alt text](/images/lbtest.jpeg) |
-| :------------------------------: |
+| ![alt text](/images/lbtest.png) |
+| :-----------------------------: |
 
 Testando em outro dispositivo:
 
-| ![alt text](/images/lbtest2.jpeg) |
-| :-------------------------------: |
+<table>
+  <tr>
+    <td style="text-align: center;">
+      <img src="/images/lbtest2.jpeg" alt="alt text" width="200" height="400"> 
+      <br>Já que o nosso Load Balancer está rodando, iremos dar inicio a criação do Auto Scaling.
+    </td>
+  </tr>
+</table>
 
-Já que o nosso Load Balancer está rodando, iremos dar inicio a criação do Auto Scaling.
-
-Até agora temos:
-
-| ![alt text](/images/diagrama.png) |
-| :-------------------------------: |
+<table>
+  <tr>
+    <td style="text-align: center;">
+    Até agora temos:
+    <br>
+      <img src="/images/diagrama.png" alt="alt text" width="500" height="600">
+    </td>
+  </tr>
+</table>
 
 ##### Passo 11: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
 
@@ -363,15 +372,25 @@ Vá no link DNS aberto do Load balancer e faça o refresh ou recarregue com F5. 
 
 ![alt text](/images/teste.png)
 
-Agora, a estrutura do nosso projeto
+<table>
+  <tr>
+    <td style="text-align: center;">
+    Agora, a estrutura do nosso projeto
+    <br>
+      <img src="/images/diagrama3.png" alt="alt text" width="500" height="600">
+    </td>
+  </tr>
+</table>
 
-| ![alt text](/images/diagrama3.png) |
-| :--------------------------------: |
-
-Testando em um dispositivo de outra rede:
-
-| ![alt text](/images/teste4.jpeg) |
-| :------------------------------: |
+<table>
+  <tr>
+    <td style="text-align: center;">
+    Testando em um dispositivo de outra rede:
+    <br>
+      <img src="/images/teste4.jpeg" alt="alt text" width="200" height="400">
+    </td>
+  </tr>
+</table>
 
 Portanto temos agora a nossa aplicação funcionando e completa.
 
