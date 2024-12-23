@@ -315,7 +315,7 @@ Até agora temos:
 
 ![alt text](/images/diagrama.png)
 
-##### Passo 10: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
+##### Passo 11: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
 
 ##### `Auto Scaling groups> Criar Auto Scaling group >`
 
