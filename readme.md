@@ -24,7 +24,7 @@ Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon 
 
 ##### Passo 10: Criando um Load Balancer.
 
-##### Passo 10: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
+##### Passo 11: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
 
 ---
 
@@ -32,10 +32,11 @@ Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon 
 
 No seu AWS Console, busque por VPC, em seguida clique em criar VPC.
 
-- Especificações:
-  - ###### Nome: WEB-WORDPRESS-VPC
-  - 2 AZ(Zonas de disponilidade)
-  - 3 subnets públicas e 2 privadas.
+| **Nome**          | **Especificações**              |
+| ----------------- | ------------------------------- |
+| WEB-WORDPRESS-VPC | 2 AZ (Zonas de Disponibilidade) |
+|                   | 3 subnets públicas              |
+|                   | 2 subnets privadas              |
 
 ![alt text](/images/VPC.jpeg)
 
@@ -371,3 +372,6 @@ Testando em um dispositivo de outra rede:
 </p>
 
 Portanto temos agora a nossa aplicação funcionando e completa.
+
+| ![alt text](/images/BH.png) |
+| :-------------------------: |
