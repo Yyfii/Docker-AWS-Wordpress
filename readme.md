@@ -50,6 +50,7 @@ Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon 
 <p align="center">
   <img src="/images/arquitetura.jpeg" alt="Project Header" width="1000">
 </p>
+
 ## Passo 1: Criando uma VPC.
 
 No seu AWS Console, busque por VPC, em seguida clique em criar VPC.
