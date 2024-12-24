@@ -7,6 +7,9 @@ Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon 
 
 ---
 
+[Arquitetura](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#arquitetura)
+<br>
+
 [Passo 1: Criando uma VPC.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-1-criando-uma-vpc-1)
 <br>
 
@@ -42,7 +45,12 @@ Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon 
 
 ---
 
-##### Passo 1: Criando uma VPC.
+## Arquitetura
+
+<p align="center">
+  <img src="/images/arquitetura.jpeg" alt="Project Header" width="1000">
+</p>
+## Passo 1: Criando uma VPC.
 
 No seu AWS Console, busque por VPC, em seguida clique em criar VPC.
 
@@ -55,7 +63,7 @@ No seu AWS Console, busque por VPC, em seguida clique em criar VPC.
 | ![alt text](/images/VPC.jpeg) |
 | :---------------------------: |
 
-##### Passo 2: Criando os Security groups.
+## Passo 2: Criando os Security groups.
 
 Agora iremos criar os **Security Groups(SG)**, iremos criar dois SG, um público, que será usado pelo Load Balancer e o Bastion Host. E um privado, que será usado, pelas instancias EC2, RDS e todos os resources que exigem níveis de seguranaça.
 
@@ -85,7 +93,7 @@ Após ter criado os security groups, vá no **WEB-WORDPRESS-PRIVATE-SG**, em edi
 | ------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **NFS**: 2049 - WEB-WORDPRESS-PRIVATE-SG <br> - **Mysql/Aurora**: 3306 - 0.0.0.0/0 <br> - **HTTPS**: 444 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG |
 
-##### Passo 3: Criando o RDS.
+## Passo 3: Criando o RDS.
 
 ##### `RDS > Criar database`
 
@@ -106,7 +114,7 @@ Após ter criado os security groups, vá no **WEB-WORDPRESS-PRIVATE-SG**, em edi
 
 - ###### Criar banco.
 
-##### Passo 4: Criando o EFS.
+## Passo 4: Criando o EFS.
 
 ##### `EFS > Criar File System`
 
@@ -124,7 +132,7 @@ Clique no **file system** criado, na seção de Network clique em manage e mude 
 | ![alt text](/images/efsconfig.png) |
 | :--------------------------------: |
 
-##### Passo 5: Criando e configurando o Nat Gateway.
+## Passo 5: Criando e configurando o Nat Gateway.
 
 O **Nat Gateway** vai permitir a conexão das instancias privadas com a internet.
 
@@ -158,7 +166,7 @@ Agora iremos associar o nat gateway às subnets privadas através da route table
 
 - **Na subnet**: WEB-WORDPRESS-VPC-rtb-private2-us-east-1b, faça o mesmo processo.
 
-##### Passo 6: Organizando os endpoints no script user data.
+## Passo 6: Organizando os endpoints no script user data.
 
 No nosso user data usamos dois endpoints, um do RDS e outro do EFS.
 
@@ -216,7 +224,7 @@ sudo docker-compose -f /files/compose.yml up -d
 
 Verifique todos os seus endpoints antes de prosseguir.
 
-##### Passo 7: Criando um Bastion Host.
+## Passo 7: Criando um Bastion Host.
 
 Por questões de segurança, criamos uma máquina que possa acessar as nossas instancias privadas, e também para testar o nosso script user data.
 
@@ -247,7 +255,7 @@ Ela deve mostrar a página inicial do Wordpress.
 | ![alt text](/images/BH.png) |
 | :-------------------------: |
 
-##### Passo 8: Criando um launch template.
+## Passo 8: Criando um launch template.
 
 ##### `Instancias > Launch Templates > Launch Instances > Criar template`
 
@@ -265,7 +273,7 @@ Ela deve mostrar a página inicial do Wordpress.
 
   - ###### Launch Instance.
 
-##### Passo 9: Criando instancias.
+## Passo 9: Criando instancias.
 
 ##### `Instancias > Launch Instance.Launch Instance from template`
 
@@ -318,7 +326,7 @@ df -h
 
 Observe se o seu mount está correto. Se o seu Bastion Host está mostrando o wordpress e o seu mount está mostrando o link do efs amazon, então agora nos resta apenas criar um Load Balancer e o Auto Scaling.
 
-##### Passo 10: Criando um Load Balancer.
+## Passo 10: Criando um Load Balancer.
 
 ##### `Load Balancers > Criar Load Balancer`
 
@@ -363,7 +371,7 @@ Copie e acesse o DNS do load balancer no seu navegador.
   </tr>
 </table>
 
-##### Passo 11: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
+## Passo 11: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
 
 ##### `Auto Scaling groups> Criar Auto Scaling group >`
 
