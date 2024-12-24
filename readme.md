@@ -1,4 +1,8 @@
+![alt text](/images/logos.png)
+
 # Docker e AWS - Wordpress.
+
+<img src="/images/SGs.jpeg" alt="alt text" width="100%" height="auto">
 
 Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon RDS, Load Balancer, Auto Scaling.
 
