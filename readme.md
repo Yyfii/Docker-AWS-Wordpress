@@ -25,16 +25,16 @@ Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon 
 [Passo 5: Criando e configurando o Nat Gateway.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-5-criando-e-configurando-o-nat-gateway)
 <br>
 
-[Passo 6: Organizando os endpoints no script user data.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-6-criando-e-configurando-o-nat-gateway)
+[Passo 6: Organizando os endpoints no script user data.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-6-organizando-os-endpoints-no-script-user-data)
 <br>
 
-[Passo 7: Criando um Bastion Host.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-7-criando-e-configurando-o-nat-gateway)
+[Passo 7: Criando um Bastion Host.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-7-criando-um-bastion-host)
 <br>
 
-[Passo 8: Criando um launch template.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-8-criando-e-configurando-o-nat-gateway)
+[Passo 8: Criando um launch template.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-8-criando-um-launch-template)
 <br>
 
-[Passo 9: Criando instancias.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-9-criando-e-configurando-o-nat-gateway)
+[Passo 9: Criando instancias.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-9-criando-instancias)
 <br>
 
 [Passo 10: Criando um Load Balancer.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-10-criando-um-load-balancer)
