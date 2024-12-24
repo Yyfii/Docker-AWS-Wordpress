@@ -48,7 +48,7 @@ Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon 
 ## Arquitetura
 
 <p align="center">
-  <img src="/images/arquitetura.jpeg" alt="Project Header" width="1000">
+  <img src="/images/arquitetura.jpeg" alt="Project Header" width="600">
 </p>
 
 ## Passo 1: Criando uma VPC.
