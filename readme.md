@@ -3,11 +3,15 @@
 <p align="center">
   <img src="/images/logos3.png" alt="Project Header" width="1000">
 </p>
+<<<<<<< HEAD
 
 [![Amazon Linux](https://img.shields.io/badge/Amazon%20Linux-DDD?logo=amazon)](https://aws.amazon.com/amazon-linux/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![WordPress](https://img.shields.io/badge/WordPress-21759B?logo=wordpress&logoColor=white)](https://wordpress.org/)
 
+=======
+Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon RDS, Load Balancer, Auto Scaling.
+>>>>>>> 1ab319c99abaddb936a0926484942554d1572e5e
 ---
 
 [Arquitetura](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#arquitetura)
