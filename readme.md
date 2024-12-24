@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/images/logos2.png" alt="Project Header" width="1000">
+  <img src="/images/logos3.png" alt="Project Header" width="1000">
 </p>
 
 # Docker e AWS - Wordpress.
