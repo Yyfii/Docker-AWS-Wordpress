@@ -10,7 +10,7 @@ Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon 
 [Arquitetura](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#arquitetura)
 <br>
 
-[Passo 1: Criando uma VPC.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-1-criando-uma-vpc-1)
+[Passo 1: Criando uma VPC.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-1-criando-uma-vpc)
 <br>
 
 [Passo 2: Criando os Security groups.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-2-criando-os-security-groups-1)
