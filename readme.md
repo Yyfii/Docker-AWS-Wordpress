@@ -1,9 +1,8 @@
+# Docker e AWS - Wordpress.
+
 <p align="center">
   <img src="/images/logos3.png" alt="Project Header" width="1000">
 </p>
-
-# Docker e AWS - Wordpress.
-
 Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon RDS, Load Balancer, Auto Scaling.
 
 ---
