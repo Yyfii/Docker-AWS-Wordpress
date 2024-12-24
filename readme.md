@@ -13,34 +13,34 @@ Esse projeto de forma geral fará uso de EC2s(Elastic Compute Clouding), Amazon 
 [Passo 1: Criando uma VPC.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-1-criando-uma-vpc)
 <br>
 
-[Passo 2: Criando os Security groups.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-2-criando-os-security-groups-1)
+[Passo 2: Criando os Security groups.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-2-criando-os-security-groups)
 <br>
 
-[Passo 3: Criando o RDS.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-3-criando-o-rds-1)
+[Passo 3: Criando o RDS.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-3-criando-o-rds)
 <br>
 
-[Passo 4: Criando o EFS.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-4-criando-o-efs-1)
+[Passo 4: Criando o EFS.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-4-criando-o-efs)
 <br>
 
-[Passo 5: Criando e configurando o Nat Gateway.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-5-criando-e-configurando-o-nat-gateway-1)
+[Passo 5: Criando e configurando o Nat Gateway.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-5-criando-e-configurando-o-nat-gateway)
 <br>
 
-[Passo 6: Organizando os endpoints no script user data.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-6-organizando-os-endpoints-no-script-user-data-1)
+[Passo 6: Organizando os endpoints no script user data.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-6-criando-e-configurando-o-nat-gateway)
 <br>
 
-[Passo 7: Criando um Bastion Host.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-7-criando-um-bastion-host-1)
+[Passo 7: Criando um Bastion Host.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-7-criando-e-configurando-o-nat-gateway)
 <br>
 
-[Passo 8: Criando um launch template.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-8-criando-um-launch-template-1)
+[Passo 8: Criando um launch template.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-8-criando-e-configurando-o-nat-gateway)
 <br>
 
-[Passo 9: Criando instancias.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-9-criando-instancias-1)
+[Passo 9: Criando instancias.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-9-criando-e-configurando-o-nat-gateway)
 <br>
 
-[Passo 10: Criando um Load Balancer.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-10-criando-um-load-balancer-1)
+[Passo 10: Criando um Load Balancer.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-10-criando-um-load-balancer)
 <br>
 
-[Passo 11: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-11-finalmente-criando-um-auto-scaling-group-e-testando-a-nossa-aplica%C3%A7%C3%A3o-final-1)
+[Passo 11: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.](https://github.com/Yyfii/Docker-AWS-Wordpress/tree/main?tab=readme-ov-file#passo-11-finalmente-criando-um-auto-scaling-group-e-testando-a-nossa-aplica%C3%A7%C3%A3o-final)
 <br>
 
 ---
