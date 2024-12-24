@@ -402,5 +402,3 @@ Copie e acesse o DNS do load balancer no seu navegador.
     Testando em um dispositivo de outra rede e na minha própria rede.
 
 ![alt text](/images/testes.png)
-
-Portanto temos agora a nossa aplicação funcionando e completa.
