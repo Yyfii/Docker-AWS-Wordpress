@@ -69,7 +69,8 @@ No seu AWS Console, busque por VPC, em seguida clique em criar VPC.
 
 ## Passo 2: Criando os Security groups.
 
-Agora iremos criar os **Security Groups(SG)**, iremos criar dois SG, um público, que será usado pelo Load Balancer e o Bastion Host. E um privado, que será usado, pelas instancias EC2, RDS e todos os resources que exigem níveis de seguranaça.
+Agora iremos criar os **Security Groups(SG)**, iremos criar dois SG, um público, que será usado pelo Load Balancer e o Bastion Host. E um privado, que será usado, pelas instancias EC2, RDS e todos os resources que exigem níveis de segurança.
+**Obs:Os security groups se relacionam entre si, então crie-os primeiro depois adicione ou edite as regras**
 
 <table>
   <tr>
@@ -85,17 +86,23 @@ Vá para:
 
 - Especificações:
 
-| **Nome**                 | **VPC**               | **Inbound Rules**                                                                                                                                                                                                               |
-| ------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **Mysql/Aurora**: 3306 - 0.0.0.0/0 <br> - **HTTPS**: 444 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG |
+| **Nome**                | **VPC**               | **Inbound Rules**                                                                           |
+| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------- |
+| WEB-WORDPRESS-PUBLIC-SG | WEB-WORDPRESS-VPC-vpc | - **HTTPS**: 443 - 0.0.0.0/0 <br> - **HTTP**: 80 - 0.0.0.0/0 <br> - **SSH**: 22 - 0.0.0.0/0 |
+
+- Especificações:
+
+| **Nome**                 | **VPC**               | **Inbound Rules**                                                                                                                                                               |
+| ------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **Mysql/Aurora**: 3306 - 0.0.0.0/0 <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG |
 
 Após ter criado os security groups, vá no **WEB-WORDPRESS-PRIVATE-SG**, em editar regras de entrada, e adicione a seguinte regra:
 
 - NFS - Source: WEB-WORDPRESS-PRIVATE-SG
 
-| **Nome**                 | **VPC**               | **Inbound Rules**                                                                                                                                                                                                                                                               |
-| ------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **NFS**: 2049 - WEB-WORDPRESS-PRIVATE-SG <br> - **Mysql/Aurora**: 3306 - 0.0.0.0/0 <br> - **HTTPS**: 444 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG |
+| **Nome**                 | **VPC**               | **Inbound Rules**                                                                                                                                                                                                               |
+| ------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **NFS**: 2049 - WEB-WORDPRESS-PRIVATE-SG <br> - **Mysql/Aurora**: 3306 - 0.0.0.0/0 <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG |
 
 ## Passo 3: Criando o RDS.
 
@@ -109,7 +116,7 @@ Após ter criado os security groups, vá no **WEB-WORDPRESS-PRIVATE-SG**, em edi
 | **Tipo de Banco de Dados** | MYSQL                             |
 | **Plano**                  | FreeTier                          |
 | **Nome do Banco de Dados** | wordpress                         |
-| **Autenticação**           | Admin - MyNewPass1                |
+| **Autenticação**           | admin - MyNewPass1                |
 | **Tipo de Instância**      | db.t3.micro                       |
 | **Conexão com EC2**        | Não conectado                     |
 | **VPC**                    | WEB-WORDPRESS-VPC-vpc             |
@@ -131,7 +138,7 @@ Após ter criado os security groups, vá no **WEB-WORDPRESS-PRIVATE-SG**, em edi
 
 - ###### Criar.
 
-Clique no **file system** criado, na seção de Network clique em manage e mude os security groups para o **WEB-WORDPRESS-PRIVATE1-SG**.
+Clique no **file system** criado, na seção de Network clique em manage e mude os security groups para o **WEB-WORDPRESS-PRIVATE-SG**.
 
 | ![alt text](/images/efsconfig.png) |
 | :--------------------------------: |
@@ -170,7 +177,9 @@ Agora iremos associar o nat gateway às subnets privadas através da route table
 
 - **Na subnet**: WEB-WORDPRESS-VPC-rtb-private2-us-east-1b, faça o mesmo processo.
 
-## Passo 6: Organizando os endpoints no script user data.
+## Passo 6: Criando um Bastion Host.
+
+### Organizando os endpoints no script user data.
 
 No nosso user data usamos dois endpoints, um do RDS e outro do EFS.
 
@@ -181,6 +190,117 @@ No nosso user data usamos dois endpoints, um do RDS e outro do EFS.
 
 - Vá no **EFS** criado, clique nele, clique em `Attach/anexar`, e copie o comando abaixo de `Usando o client NFS`.
 - No user data procure a linha que inicia com `sudo mount -t nfs4`, substitua-a pelo comando que você copiou. E no final do comando onde tiver `:/ efs`, substitiua por `:/ /mnt/efs`.
+
+**`User Data`**
+
+```sh
+#!/bin/bash
+
+# Atualiza os pacotes da maquina
+yum update -y
+
+# Instala o git e o docker
+yum install git docker amazon-efs-utils  -y
+# Inicia o docker e instala o docker compose
+systemctl enable docker
+systemctl start docker
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Cria uma pasta no diretório raiz, para que o compose.yml não fique nos arquivos temporarios
+
+mkdir -p  /files
+
+# Cria um arquivo compose.yml na pasta files
+cat <<EOF> /files/compose.yml
+services:
+  wordpress:
+    image: wordpress
+    restart: always
+    ports:
+      - 80:80
+    environment:
+      WORDPRESS_DB_HOST: web-wordpress-rds.cz2gg0mwcojr.us-east-1.rds.amazonaws.com:3306
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: MyNewPass1
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - /mnt/efs:/var/www/html
+EOF
+
+sudo mkdir -p /mnt/efs
+
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-0aa70482692804c83.efs.us-east-1.amazonaws.com:/ /mnt/efs
+
+cat <<EOF> /etc/systemd/system/wordpress.service
+[Unit]
+Description=Wordpress Container Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+WorkingDirectory=/files
+ExecStart=/usr/local/bin/docker-compose -f /files/compose.yml up -d
+ExecStop=/usr/local/bin/docker-compose -f /files/compose.yml stop
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable wordpress.service
+sudo systemctl start wordpress.service
+
+```
+
+Verifique todos os seus endpoints antes de prosseguir.
+
+Por questões de segurança, criamos uma máquina que possa acessar as nossas instancias privadas.
+
+##### `EC2 > Instancias > Launch Instances`
+
+- Especificações:
+
+| **..**                           | **..**                                   |
+| -------------------------------- | ---------------------------------------- |
+| **Nome**                         | WEB-WORDPRESS-BASTION-HOST               |
+| **Key pair**                     | pbnov24                                  |
+| **Editar configurações de rede** | WEB-WORDPRESS-VPC                        |
+| **Subnet**                       | subnet-public1-us-east-1a                |
+| **Habilitar IP Público**         | Sim                                      |
+| **Selecionar SG**                | WEB-WORDPRESS-PUBLIC-SG                  |
+| **Detalhes avançados**           | User data: Cole o seu user data no campo |
+
+- ###### Launch Instance.
+
+Espere a instancia ficar com o **status checked**.
+
+Clique na instancia, Copie o **IP Público** dela e cole no seu navegador, não irá funcionar pois como ela é uma instancia pública, o banco de dados e o efs não conseguem chegar a ela devido aos grupos de segurança.
+
+Mas, se você quiser testar, você pode criar um container manualmente, vá na instância, Conectar e conectar novamente.
+
+- Dentro da instancia
+
+```sh
+sudo systemctl stop wordpress.service
+sudo docker ps
+sudo docker rm -f files-wordpress-1
+sudo docker images
+sudo docker rmi wordpress
+sudo docker run -d -p 80:80 --name wordpress wordpress
+sudo docker ps
+```
+
+Copie o IP público da instancia Bastion Host e cole no navegador, a página inicial será aberta mesmo que o banco não esteja conectado.
+
+## Passo 7: Criando um launch template.
+
+##### `Instancias > Launch Templates > Launch Instances > Criar template`
+
+**`User Data`**
 
 ```sh
 #!/bin/bash
@@ -226,58 +346,21 @@ sudo docker-compose -f /files/compose.yml up -d
 
 ```
 
-Verifique todos os seus endpoints antes de prosseguir.
-
-## Passo 7: Criando um Bastion Host.
-
-Por questões de segurança, criamos uma máquina que possa acessar as nossas instancias privadas, e também para testar o nosso script user data.
-
-##### `EC2 > Instancias > Launch Instances`
-
 - Especificações:
 
-| **..**                           | **..**                                   |
-| -------------------------------- | ---------------------------------------- |
-| **Nome**                         | WEB-WORDPRESS-BASTION-HOST               |
-| **Key pair**                     | pbnov24                                  |
-| **Editar configurações de rede** | WEB-WORDPRESS-VPC                        |
-| **Subnet**                       | subnet-public1-us-east-1a                |
-| **Habilitar IP Público**         | Sim                                      |
-| **Selecionar SG**                | WEB-WORDPRESS-PUBLIC-SG                  |
-| **Detalhes avançados**           | User data: Cole o seu user data no campo |
-
-- ###### Launch Instance.
-
-Espere a instancia ficar com o **status checked**.
-
-Clique na instancia, Copie o **IP Público** dela e cole no seu navegador.
-
-Ela pode demorar um pouco pra carregar por conta de ainda estar iniciando o container. Então enquanto ela carrega você pode seguir para o próximo passo.
-
-Ela deve mostrar a página inicial do Wordpress.
-
-| ![alt text](/images/BH.png) |
-| :-------------------------: |
-
-## Passo 8: Criando um launch template.
-
-##### `Instancias > Launch Templates > Launch Instances > Criar template`
-
-- Especificações:
-
-  | **Especificação**      | **Valor**                                |
-  | ---------------------- | ---------------------------------------- |
-  | **Nome**               | WEB-WORDPRESS-SERVERS                    |
-  | **Quick start**        | Amazon Linux                             |
-  | **Tipo de instância**  | t2.micro                                 |
-  | **Key pair**           | pbnov24                                  |
-  | **Subnet**             | Não selecione a subnet                   |
-  | **Selecionar SG**      | WEB-WORDPRESS-PRIVATE-SG                 |
-  | **Detalhes avançados** | User data: Cole o seu user data no campo |
+  | **Especificação**      | **Valor**                                    |
+  | ---------------------- | -------------------------------------------- |
+  | **Nome**               | WEB-WORDPRESS-SERVERS                        |
+  | **Quick start**        | Amazon Linux                                 |
+  | **Tipo de instância**  | t2.micro                                     |
+  | **Key pair**           | pbnov24                                      |
+  | **Subnet**             | Não selecione a subnet                       |
+  | **Selecionar SG**      | WEB-WORDPRESS-PRIVATE-SG                     |
+  | **Detalhes avançados** | User data: Cole o seu **user data** no campo |
 
   - ###### Launch Instance.
 
-## Passo 9: Criando instancias.
+## Passo 8: Criando instancias.
 
 ##### `Instancias > Launch Instance.Launch Instance from template`
 
@@ -330,7 +413,7 @@ df -h
 
 Observe se o seu mount está correto. Se o seu Bastion Host está mostrando o wordpress e o seu mount está mostrando o link do efs amazon, então agora nos resta apenas criar um Load Balancer e o Auto Scaling.
 
-## Passo 10: Criando um Load Balancer.
+## Passo 9: Criando um Load Balancer.
 
 ##### `Load Balancers > Criar Load Balancer`
 
@@ -347,7 +430,7 @@ Procure por Classic Load Balancer e clique em criar.
 | ![alt text](/images/instances.png) |
 | :--------------------------------: |
 
-- Neste mommento o que nos resta é associar as instancias criadas para verificar se o Load Balancer está de fato funcionando.
+- Neste momento o que nos resta é associar as instancias criadas para verificar se o Load Balancer está de fato funcionando.
 
 ##### `Load Balancers > WEB-WORDPRESS-CLB > Seção no LB de Target Instances > Manage Instances`
 
@@ -359,9 +442,6 @@ Procure por Classic Load Balancer e clique em criar.
 - Agora na target Instances, verifique se o Healthy status das instancias está In-Service.
 
 Copie e acesse o DNS do load balancer no seu navegador.
-
-| ![alt text](/images/lbtestes.png) |
-| :-------------------------------: |
 
     Já que o nosso Load Balancer está rodando, iremos dar inicio a criação do Auto Scaling.
 
@@ -375,7 +455,7 @@ Copie e acesse o DNS do load balancer no seu navegador.
   </tr>
 </table>
 
-## Passo 11: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
+## Passo 10: Finalmente! Criando um auto scaling group e testando a nossa aplicação final.
 
 ##### `Auto Scaling groups> Criar Auto Scaling group >`
 
@@ -402,3 +482,5 @@ Copie e acesse o DNS do load balancer no seu navegador.
     Testando em um dispositivo de outra rede e na minha própria rede.
 
 ![alt text](/images/testes.png)
+
+## Extras
