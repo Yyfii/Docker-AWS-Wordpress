@@ -92,17 +92,17 @@ Vá para:
 
 - Especificações:
 
-| **Nome**                 | **VPC**               | **Inbound Rules**                                                                                                                                                               |
-| ------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **Mysql/Aurora**: 3306 - 0.0.0.0/0 <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG |
+| **Nome**                 | **VPC**               | **Inbound Rules**                                                                                                                                                                              |
+| ------------------------ | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **Mysql/Aurora**: 3306 - WEB-WORDPRESS-PRIVATE-SG <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG |
 
 Após ter criado os security groups, vá no **WEB-WORDPRESS-PRIVATE-SG**, em editar regras de entrada, e adicione a seguinte regra:
 
 - NFS - Source: WEB-WORDPRESS-PRIVATE-SG
 
-| **Nome**                 | **VPC**               | **Inbound Rules**                                                                                                                                                                                                               |
-| ------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **NFS**: 2049 - WEB-WORDPRESS-PRIVATE-SG <br> - **Mysql/Aurora**: 3306 - 0.0.0.0/0 <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG |
+| **Nome**                 | **VPC**               | **Inbound Rules**                                                                                                                                                                                                                              |
+| ------------------------ | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WEB-WORDPRESS-PRIVATE-SG | WEB-WORDPRESS-VPC-vpc | - **NFS**: 2049 - WEB-WORDPRESS-PRIVATE-SG <br> - **Mysql/Aurora**: 3306 - WEB-WORDPRESS-PRIVATE-SG <br> - **HTTPS**: 443 - WEB-WORDPRESS-PUBLIC-SG <br> - **HTTP**: 80 - WEB-WORDPRESS-PUBLIC-SG <br> - **SSH**: 22 - WEB-WORDPRESS-PUBLIC-SG |
 
 ## Passo 3: Criando o RDS.
 
@@ -220,7 +220,7 @@ services:
     ports:
       - 80:80
     environment:
-      WORDPRESS_DB_HOST: web-wordpress-rds.cz2gg0mwcojr.us-east-1.rds.amazonaws.com:3306
+      WORDPRESS_DB_HOST: <ENDPOINT RDS>:3306
       WORDPRESS_DB_USER: admin
       WORDPRESS_DB_PASSWORD: MyNewPass1
       WORDPRESS_DB_NAME: wordpress
@@ -230,30 +230,10 @@ EOF
 
 sudo mkdir -p /mnt/efs
 
-sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-0aa70482692804c83.efs.us-east-1.amazonaws.com:/ /mnt/efs
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-05cf370359e4902e5.efs.us-east-1.amazonaws.com:/ /mnt/efs
 
-cat <<EOF> /etc/systemd/system/wordpress.service
-[Unit]
-Description=Wordpress Container Service
-Requires=docker.service
-After=docker.service
 
-[Service]
-Type=simple
-Restart=always
-RestartSec=5
-WorkingDirectory=/files
-ExecStart=/usr/local/bin/docker-compose -f /files/compose.yml up -d
-ExecStop=/usr/local/bin/docker-compose -f /files/compose.yml stop
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl daemon-reload
-sudo systemctl enable wordpress.service
-sudo systemctl start wordpress.service
-
+sudo docker-compose -f /files/compose.yml up -d
 ```
 
 Verifique todos os seus endpoints antes de prosseguir.
@@ -482,5 +462,3 @@ Copie e acesse o DNS do load balancer no seu navegador.
     Testando em um dispositivo de outra rede e na minha própria rede.
 
 ![alt text](/images/testes.png)
-
-## Extras
